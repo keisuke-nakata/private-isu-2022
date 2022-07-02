@@ -36,14 +36,14 @@ colplot -dir $collectl_result_dir -plots cpu,disk,mem -filetype png -filedir $co
 # alp
 alp_result_dir=$result_dir/alp
 mkdir -p $alp_result_dir
-alp json --file $NGINX_ACCESS_LOG --sort=sum > $alp_result_dir/alp.log
+sudo alp json --file $NGINX_ACCESS_LOG --sort=sum > $alp_result_dir/alp.log
 
 # copy nginx access & error log
 nginx_result_dir=$result_dir/nginx
 mkdir -p $nginx_result_dir
-cp $NGINX_ACCESS_LOG $NGINX_ERROR_LOG $nginx_result_dir/
+sudo cp $NGINX_ACCESS_LOG $NGINX_ERROR_LOG $nginx_result_dir/
 
 # git push
-git add .
-git commit -m "${commit_id}\ncommitted by deploy_and_benchmark.sh"
+git add --all
+git commit -m "${commit_id}" -m "committed by deploy_and_benchmark.sh"
 git push
