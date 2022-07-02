@@ -1,0 +1,21 @@
+Count: 396  Time=0.06s (22s)  Lock=0.00s (0s)  Rows=3.0 (1170), isuconp[isuconp]@localhost
+  SELECT * FROM `comments` WHERE `post_id` = N ORDER BY `created_at` DESC LIMIT N
+
+Count: 18  Time=0.02s (0s)  Lock=0.00s (0s)  Rows=10001.0 (180018), isuconp[isuconp]@localhost
+  SELECT `id`, `user_id`, `body`, `created_at`, `mime` FROM `posts` ORDER BY `created_at` DESC
+
+Count: 396  Time=0.02s (6s)  Lock=0.00s (0s)  Rows=1.0 (396), isuconp[isuconp]@localhost
+  SELECT COUNT(*) AS `count` FROM `comments` WHERE `post_id` = N
+
+Count: 1566  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=1.0 (1566), isuconp[isuconp]@localhost
+  SELECT * FROM `users` WHERE `id` = N
+
+Count: 4716  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=1754.1 (8272276), isuconp[isuconp]@localhost
+  #
+
+Count: 2358  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), 0users@0hosts
+  administrator command: Prepare
+
+Count: 2358  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), 0users@0hosts
+  administrator command: Close stmt
+
