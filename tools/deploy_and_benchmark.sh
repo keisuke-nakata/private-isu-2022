@@ -5,8 +5,8 @@ RESULT_BASE_DIR=/home/isucon/private_isu/result
 set -ux
 
 # get latest changes
-#git pull ...
-commit_id="test"
+git pull
+commit_id=$(git rev-parse HEAD)
 
 # create result dir
 result_dir=$RESULT_BASE_DIR/$(date +%Y%m%d-%H%M%S)_$commit_id
@@ -25,7 +25,9 @@ collectl -scdm -f $collectl_result_dir -P &
 collectl_job_id=$!
 
 # run benchmark
-ab -c 1 -t 30 http://localhost/
+benchmark_result_dir=$result_dir/benchmark
+mkdir -p $benchmark_result_dir
+ab -c 1 -t 30 http://localhost/ | tee $benchmark_result_dir/ab.log
 
 # finish collectl & run colplot
 kill -SIGINT $collectl_job_id
@@ -40,3 +42,8 @@ alp json --file $NGINX_ACCESS_LOG --sort=sum > $alp_result_dir/alp.log
 nginx_result_dir=$result_dir/nginx
 mkdir -p $nginx_result_dir
 cp $NGINX_ACCESS_LOG $NGINX_ERROR_LOG $nginx_result_dir/
+
+# git push
+git add .
+git commit -m "${commit_id}\ncommitted by deploy_and_benchmark.sh"
+git push
