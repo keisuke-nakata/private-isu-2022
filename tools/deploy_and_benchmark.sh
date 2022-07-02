@@ -5,6 +5,10 @@ RESULT_BASE_DIR=/home/isucon/private_isu/result
 
 set -ux
 
+###
+# deploy
+###
+
 # get latest changes
 git pull
 commit_id=$(git rev-parse HEAD)
@@ -15,6 +19,10 @@ mkdir -p $result_dir
 
 # deploy
 #...
+
+###
+# prepare benchmark
+###
 
 # refresh nginx access & error log
 sudo truncate --size 0 $NGINX_ACCESS_LOG $NGINX_ERROR_LOG
@@ -28,10 +36,16 @@ mkdir -p $collectl_result_dir
 collectl -scdm -f $collectl_result_dir -P &
 collectl_job_id=$!
 
+###
 # run benchmark
+###
 benchmark_result_dir=$result_dir/benchmark
 mkdir -p $benchmark_result_dir
 ab -c 1 -t 30 http://localhost/ | tee $benchmark_result_dir/ab.log
+
+###
+# collect result
+###
 
 # finish collectl & run colplot
 kill -SIGINT $collectl_job_id
@@ -47,14 +61,14 @@ nginx_result_dir=$result_dir/nginx
 mkdir -p $nginx_result_dir
 sudo cp $NGINX_ACCESS_LOG $NGINX_ERROR_LOG $nginx_result_dir/
 
-# copy mysql slow query log
+# analyze mysql slow query log
 mysql_result_dir=$result_dir/mysql
 mkdir -p $mysql_result_dir
-sudo cp $MYSQL_SLOW_LOG $mysql_result_dir/
+sudo mysqldumpslow $MYSQL_SLOW_LOG > $mysql_result_dir/mysqldumpslow.log
 
 # git push
-sudo chown -R $result_dir
-sudo chgrp -R $result_dir
+sudo chown -R isucon $result_dir
+sudo chgrp -R isucon $result_dir
 git add --all
 git commit -m "${commit_id}" -m "committed by deploy_and_benchmark.sh"
 git push
