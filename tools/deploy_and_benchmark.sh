@@ -1,5 +1,6 @@
 NGINX_ACCESS_LOG=/var/log/nginx/access.log
 NGINX_ERROR_LOG=/var/log/nginx/error.log
+MYSQL_SLOW_LOG=/var/log/mysql/mysql-slow.log
 RESULT_BASE_DIR=/home/isucon/private_isu/result
 
 set -ux
@@ -17,6 +18,9 @@ mkdir -p $result_dir
 
 # refresh nginx access & error log
 sudo truncate --size 0 $NGINX_ACCESS_LOG $NGINX_ERROR_LOG
+
+# refresh mysql slow query log
+sudo truncate --size 0 $MYSQL_SLOW_LOG
 
 # start collectl
 collectl_result_dir=$result_dir/collectl
@@ -42,6 +46,11 @@ sudo alp json --file $NGINX_ACCESS_LOG --sort=sum > $alp_result_dir/alp.log
 nginx_result_dir=$result_dir/nginx
 mkdir -p $nginx_result_dir
 sudo cp $NGINX_ACCESS_LOG $NGINX_ERROR_LOG $nginx_result_dir/
+
+# copy mysql slow query log
+mysql_result_dir=$result_dir/mysql
+mkdir -p $mysql_result_dir
+sudo cp $MYSQL_SLOW_LOG $mysql_result_dir/
 
 # git push
 sudo chown -R $result_dir
