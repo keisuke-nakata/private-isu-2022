@@ -29,6 +29,7 @@ sudo truncate --size 0 $NGINX_ACCESS_LOG $NGINX_ERROR_LOG
 
 # refresh mysql slow query log
 sudo truncate --size 0 $MYSQL_SLOW_LOG
+sudo mysqladmin flush-logs
 
 # start collectl
 collectl_result_dir=$result_dir/collectl
@@ -65,6 +66,8 @@ sudo cp $NGINX_ACCESS_LOG $NGINX_ERROR_LOG $nginx_result_dir/
 mysql_result_dir=$result_dir/mysql
 mkdir -p $mysql_result_dir
 sudo mysqldumpslow $MYSQL_SLOW_LOG > $mysql_result_dir/mysqldumpslow.log
+sudo pt-query-digest $MYSQL_SLOW_LOG > $mysql_result_dir/pt-query-digest.log
+sudo gzip -c $MYSQL_SLOW_LOG > $mysql_result_dir/mysql-slow.log.gz
 
 # git push
 sudo chown -R isucon $result_dir
