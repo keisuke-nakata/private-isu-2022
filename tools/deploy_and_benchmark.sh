@@ -44,6 +44,8 @@ mkdir -p $nginx_result_dir
 sudo cp $NGINX_ACCESS_LOG $NGINX_ERROR_LOG $nginx_result_dir/
 
 # git push
+sudo chown -R $result_dir
+sudo chgrp -R $result_dir
 git add --all
 git commit -m "${commit_id}" -m "committed by deploy_and_benchmark.sh"
 git push
