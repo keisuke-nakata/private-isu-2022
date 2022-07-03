@@ -1,15 +1,15 @@
+REPO_ROOT_DIR=/home/isucon/private_isu
 NGINX_ACCESS_LOG=/var/log/nginx/access.log
 NGINX_ERROR_LOG=/var/log/nginx/error.log
 MYSQL_SLOW_LOG=/var/log/mysql/mysql-slow.log
-RESULT_BASE_DIR=/home/isucon/private_isu/result
+RESULT_BASE_DIR=$REPO_ROOT_DIR/result
 BENCHMARKER_INSTANCE_PRIVATE_IP=172.31.46.66
 APP_INSTANCE_PRIVATE_IP=172.31.43.134
+DB_DEPLOY_DIR=$REPO_ROOT_DIR/sql
+MYSQL_CONF_DIR=/etc/mysql/mysql.conf.d
+NGINX_CONF_DIR=/etc/nginx
 
 set -ux
-
-###
-# deploy
-###
 
 # get latest changes
 git pull
@@ -19,11 +19,8 @@ commit_id=$(git rev-parse HEAD)
 result_dir=$RESULT_BASE_DIR/$(date +%Y%m%d-%H%M%S)_$commit_id
 mkdir -p $result_dir
 
-# deploy
-#...
-
 ###
-# prepare benchmark
+# refresh logs
 ###
 
 # refresh nginx access & error log
@@ -32,6 +29,23 @@ sudo truncate --size 0 $NGINX_ACCESS_LOG $NGINX_ERROR_LOG
 # refresh mysql slow query log
 sudo truncate --size 0 $MYSQL_SLOW_LOG
 sudo mysqladmin flush-logs
+
+###
+# deploy
+###
+
+# deploy mysql
+sudo cp $REPO_ROOT_DIR/conf/mysql.cnf $MYSQL_CONF_DIR/
+sudo cp $REPO_ROOT_DIR/conf/mysqld.cnf $MYSQL_CONF_DIR/
+sudo systemctl restart mysql
+
+# deploy nginx
+sudo cp $REPO_ROOT_DIR/conf/nginx.conf $NGINX_CONF_DIR/
+sudo systemctl reload nginx
+
+###
+# prepare benchmark
+###
 
 # start collectl
 collectl_result_dir=$result_dir/collectl
