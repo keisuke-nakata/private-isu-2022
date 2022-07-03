@@ -55,6 +55,14 @@ done
 sudo cp $REPO_ROOT_DIR/conf/nginx.conf $NGINX_CONF_DIR/
 sudo systemctl reload nginx
 
+# deploy go
+(
+  cd $REPO_ROOT_DIR
+  cd webapp/golang
+  bash setup.sh
+)
+sudo systemctl restart isu-go
+
 ###
 # prepare benchmark
 ###

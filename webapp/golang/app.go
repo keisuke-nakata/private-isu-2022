@@ -855,6 +855,8 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to connect to DB: %s.", err.Error())
 	}
+	db.SetMaxOpenConns(0)  // 0: 無限
+	db.SetMaxIdleConns(30)
 	defer db.Close()
 
 	mux := goji.NewMux()
