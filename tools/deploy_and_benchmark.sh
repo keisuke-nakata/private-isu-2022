@@ -43,8 +43,8 @@ sudo mysqladmin flush-logs
 ###
 
 # deploy mysql
-sudo cp ${REPO_ROOT_DIR}/conf/mysql.cnf $MYSQL_CONF_DIR/
-sudo cp ${REPO_ROOT_DIR}/conf/mysqld.cnf $MYSQL_CONF_DIR/
+sudo cp ${REPO_ROOT_DIR}/conf/mysql/mysql.cnf $MYSQL_CONF_DIR/
+sudo cp ${REPO_ROOT_DIR}/conf/mysql/mysqld.cnf $MYSQL_CONF_DIR/
 sudo systemctl restart mysql
 
 for file in $(find $MYSQL_DEPLOY_DIR -type f); do
@@ -52,7 +52,8 @@ for file in $(find $MYSQL_DEPLOY_DIR -type f); do
 done
 
 # deploy nginx
-sudo cp $REPO_ROOT_DIR/conf/nginx.conf $NGINX_CONF_DIR/
+sudo cp $REPO_ROOT_DIR/conf/nginx/nginx.conf $NGINX_CONF_DIR/
+sudo cp $REPO_ROOT_DIR/conf/nginx/isucon.conf $NGINX_CONF_DIR/sites-enabled/
 sudo systemctl reload nginx
 
 # deploy go
