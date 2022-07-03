@@ -5,7 +5,7 @@ MYSQL_SLOW_LOG=/var/log/mysql/mysql-slow.log
 RESULT_BASE_DIR=$REPO_ROOT_DIR/result
 BENCHMARKER_INSTANCE_PRIVATE_IP=172.31.46.66
 APP_INSTANCE_PRIVATE_IP=172.31.43.134
-DB_DEPLOY_DIR=$REPO_ROOT_DIR/sql
+MYSQL_DEPLOY_DIR=$REPO_ROOT_DIR/sql
 MYSQL_CONF_DIR=/etc/mysql/mysql.conf.d
 NGINX_CONF_DIR=/etc/nginx
 
@@ -38,6 +38,8 @@ sudo mysqladmin flush-logs
 sudo cp $REPO_ROOT_DIR/conf/mysql.cnf $MYSQL_CONF_DIR/
 sudo cp $REPO_ROOT_DIR/conf/mysqld.cnf $MYSQL_CONF_DIR/
 sudo systemctl restart mysql
+
+
 
 # deploy nginx
 sudo cp $REPO_ROOT_DIR/conf/nginx.conf $NGINX_CONF_DIR/
@@ -77,14 +79,15 @@ sudo alp json --file $NGINX_ACCESS_LOG --sort=sum > $alp_result_dir/alp.log
 # copy nginx access & error log
 nginx_result_dir=$result_dir/nginx
 mkdir -p $nginx_result_dir
-sudo cp $NGINX_ACCESS_LOG $NGINX_ERROR_LOG $nginx_result_dir/
+sudo gzip --best -c $NGINX_ACCESS_LOG > $nginx_result_dir/access.log.gz
+sudo gzip --bset -c $NGINX_ERROR_LOG > $nginx_result_dir/error.log.gz
 
 # analyze mysql slow query log
 mysql_result_dir=$result_dir/mysql
 mkdir -p $mysql_result_dir
 sudo mysqldumpslow $MYSQL_SLOW_LOG > $mysql_result_dir/mysqldumpslow.log
 sudo pt-query-digest $MYSQL_SLOW_LOG > $mysql_result_dir/pt-query-digest.log
-sudo gzip -c $MYSQL_SLOW_LOG > $mysql_result_dir/mysql-slow.log.gz
+sudo gzip --best -c $MYSQL_SLOW_LOG > $mysql_result_dir/mysql-slow.log.gz
 
 # git push
 sudo chown -R isucon $result_dir
