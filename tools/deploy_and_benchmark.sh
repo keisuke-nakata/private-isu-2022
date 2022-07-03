@@ -2,6 +2,8 @@ NGINX_ACCESS_LOG=/var/log/nginx/access.log
 NGINX_ERROR_LOG=/var/log/nginx/error.log
 MYSQL_SLOW_LOG=/var/log/mysql/mysql-slow.log
 RESULT_BASE_DIR=/home/isucon/private_isu/result
+BENCHMARKER_INSTANCE_PRIVATE_IP=172.31.46.66
+APP_INSTANCE_PRIVATE_IP=172.31.43.134
 
 set -ux
 
@@ -42,7 +44,8 @@ collectl_job_id=$!
 ###
 benchmark_result_dir=$result_dir/benchmark
 mkdir -p $benchmark_result_dir
-ab -c 1 -t 30 http://localhost/ | tee $benchmark_result_dir/ab.log
+cmd="/home/isucon/private_isu.git/benchmarker/bin/benchmarker -u /home/isucon/private_isu.git/benchmarker/userdata -t http://${APP_INSTANCE_PRIVATE_IP}"
+ssh $BENCHMARKER_INSTANCE_PRIVATE_IP $cmd > $benchmark_result_dir/benchmarker.log
 
 ###
 # collect result
