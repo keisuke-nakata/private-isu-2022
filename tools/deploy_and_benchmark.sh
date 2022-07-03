@@ -39,7 +39,9 @@ sudo cp $REPO_ROOT_DIR/conf/mysql.cnf $MYSQL_CONF_DIR/
 sudo cp $REPO_ROOT_DIR/conf/mysqld.cnf $MYSQL_CONF_DIR/
 sudo systemctl restart mysql
 
-
+for file in $(find $MYSQL_DEPLOY_DIR -type f); do
+  mysql isuconp < $file
+done
 
 # deploy nginx
 sudo cp $REPO_ROOT_DIR/conf/nginx.conf $NGINX_CONF_DIR/
@@ -80,7 +82,7 @@ sudo alp json --file $NGINX_ACCESS_LOG --sort=sum > $alp_result_dir/alp.log
 nginx_result_dir=$result_dir/nginx
 mkdir -p $nginx_result_dir
 sudo gzip --best -c $NGINX_ACCESS_LOG > $nginx_result_dir/access.log.gz
-sudo gzip --bset -c $NGINX_ERROR_LOG > $nginx_result_dir/error.log.gz
+sudo gzip --best -c $NGINX_ERROR_LOG > $nginx_result_dir/error.log.gz
 
 # analyze mysql slow query log
 mysql_result_dir=$result_dir/mysql
