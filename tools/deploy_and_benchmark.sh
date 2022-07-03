@@ -24,7 +24,7 @@ commit_id=$(git rev-parse HEAD)
 
 # create result dir
 dt=$(date +%Y%m%d-%H%M%S)
-result_dir=$RESULT_BASE_DIR/$dt_$commit_id
+result_dir=${RESULT_BASE_DIR}/${dt}_${commit_id}
 mkdir -p $result_dir
 
 ###
@@ -43,8 +43,8 @@ sudo mysqladmin flush-logs
 ###
 
 # deploy mysql
-sudo cp $REPO_ROOT_DIR/conf/mysql.cnf $MYSQL_CONF_DIR/
-sudo cp $REPO_ROOT_DIR/conf/mysqld.cnf $MYSQL_CONF_DIR/
+sudo cp ${REPO_ROOT_DIR}/conf/mysql.cnf $MYSQL_CONF_DIR/
+sudo cp ${REPO_ROOT_DIR}/conf/mysqld.cnf $MYSQL_CONF_DIR/
 sudo systemctl restart mysql
 
 for file in $(find $MYSQL_DEPLOY_DIR -type f); do
@@ -101,7 +101,7 @@ sudo gzip --best -c $MYSQL_SLOW_LOG > $mysql_result_dir/mysql-slow.log.gz
 
 # add summary row
 jqout=$(jq -r '[.pass,.score,.success,.fail] | @tsv' $benchmark_result_dir/benchmarker.log | tr '\t' '|')
-echo "|$dt|$jqout|$commit_id|$changelog|" >> $RESULT_BASE_DIR/summary.md
+echo "|${dt}|${jqout}|${commit_id}|${changelog}|" >> $RESULT_BASE_DIR/summary.md
 
 # git push
 sudo chown -R isucon $result_dir
