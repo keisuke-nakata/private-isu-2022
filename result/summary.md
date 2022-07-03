@@ -7,3 +7,4 @@
 |20220703-183734|true|15574|14775|0|be9bae9e4a1e4cdd4fe6cad4abc3cf74110a3897|disable prepared statement 2|
 |20220703-205734|true|17216|16394|0|7454df760d00c6cd34f3dbe272687ad8ab755aea|mysql max_connection=256, go MaxOpenConns=0,MaxIdleConns=30|
 |20220703-210536|true|17276|16453|0|c98169ab7404c9cab1c9ca4e006c8d9b20e0645e|disable_log_bin|
+|20220703-211150|true|16637|15819|0|4a0cd41f59f4a239eef826b7b93e34f07d8d1cac|innodb_flush_log_at_trx_commit=0|
