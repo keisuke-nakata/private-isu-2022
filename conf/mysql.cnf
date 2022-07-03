@@ -4,3 +4,5 @@
 # Ref to https://dev.mysql.com/doc/refman/en/mysql-command-options.html
 
 [mysql]
+user = isuconp
+password = isuconp
