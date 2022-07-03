@@ -10,3 +10,4 @@
 |20220703-211150|true|16637|15819|0|4a0cd41f59f4a239eef826b7b93e34f07d8d1cac|innodb_flush_log_at_trx_commit=0|
 |20220703-211405|true|16637|15832|0|9d92bd9c610b9f2a54c32fc9ba1e73322c0a42fa|innodb_flush_log_at_trx_commit=0 take2|
 |20220703-211756|true|17129|16287|0|3a88af0ee77ae48eaa318820db05f3cb1a51988b|revert to innodb_flush_log_at_trx_commit=1|
+|20220703-214604|true|17128|16286|0|d2901437f105012d12a124837959af8349ef4f8b|serve css/js from nginx|
