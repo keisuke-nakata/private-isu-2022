@@ -48,7 +48,7 @@ sudo cp ${REPO_ROOT_DIR}/conf/mysqld.cnf $MYSQL_CONF_DIR/
 sudo systemctl restart mysql
 
 for file in $(find $MYSQL_DEPLOY_DIR -type f); do
-  mysql isuconp < $file
+  mysql --force isuconp < $file
 done
 
 # deploy nginx
