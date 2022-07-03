@@ -9,6 +9,13 @@ MYSQL_DEPLOY_DIR=$REPO_ROOT_DIR/sql
 MYSQL_CONF_DIR=/etc/mysql/mysql.conf.d
 NGINX_CONF_DIR=/etc/nginx
 
+if (( $# != 1 )); then
+  echo "Usage: $0 <change log>"
+  exit 1
+else
+  changelog=$1
+fi
+
 set -ux
 
 # get latest changes
@@ -16,7 +23,8 @@ git pull
 commit_id=$(git rev-parse HEAD)
 
 # create result dir
-result_dir=$RESULT_BASE_DIR/$(date +%Y%m%d-%H%M%S)_$commit_id
+dt=$(date +%Y%m%d-%H%M%S)
+result_dir=$RESULT_BASE_DIR/$dt_$commit_id
 mkdir -p $result_dir
 
 ###
@@ -90,6 +98,10 @@ mkdir -p $mysql_result_dir
 sudo mysqldumpslow $MYSQL_SLOW_LOG > $mysql_result_dir/mysqldumpslow.log
 sudo pt-query-digest $MYSQL_SLOW_LOG > $mysql_result_dir/pt-query-digest.log
 sudo gzip --best -c $MYSQL_SLOW_LOG > $mysql_result_dir/mysql-slow.log.gz
+
+# add summary row
+jqout=$(jq -r '[.pass,.score,.success,.fail] | @tsv' $benchmark_result_dir/benchmarker.log | tr '\t' '|')
+echo "|$dt|$jqout|$commit_id|$changelog|" >> $RESULT_BASE_DIR/summary.md
 
 # git push
 sudo chown -R isucon $result_dir
