@@ -388,7 +388,7 @@ func getIndex(w http.ResponseWriter, r *http.Request) {
 
 	err := db.Select(&results, "SELECT "+
 		"`posts`.`id`, `posts`.`user_id`, `posts`.`body`, `posts`.`mime`, `posts`.`created_at`, "+
-		"`users`.`id` AS 'User.id', `users`.`account_name` AS 'User.AccountName', `users`.`passhash` AS 'User.Passhash',"+
+		"`users`.`id` AS 'User.ID', `users`.`account_name` AS 'User.AccountName', `users`.`passhash` AS 'User.Passhash',"+
 		"`users`.`authority` AS 'User.Authority', `users`.`del_flg` AS 'User.DelFlg', `users`.`created_at` AS 'User.CreatedAt'"+
 		"FROM `posts` JOIN `users` ON `posts`.`user_id` = `users`.`id` "+
 		"WHERE `users`.`del_flg` = 0 "+
