@@ -80,7 +80,7 @@ readonly collectl_job_id=$!
 readonly benchmark_result_dir=$result_dir/benchmark
 mkdir -p $benchmark_result_dir
 cmd="/home/isucon/private_isu.git/benchmarker/bin/benchmarker -u /home/isucon/private_isu.git/benchmarker/userdata -t http://${APP_INSTANCE_PRIVATE_IP}"
-ssh -i ~/.ssh/for_benchmarker isucon@$BENCHMARKER_INSTANCE_PRIVATE_IP $cmd > $benchmark_result_dir/benchmarker.log
+ssh -i ~/.ssh/for_benchmarker isucon@$BENCHMARKER_INSTANCE_PRIVATE_IP $cmd | tee $benchmark_result_dir/benchmarker.log
 
 ###
 # collect result
