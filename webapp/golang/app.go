@@ -677,8 +677,8 @@ func postIndex(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 画像をファイルとして保存
-	imgFile := path.Join(ImageDir, strconv.Itoa(pid) + "." + ext)
-	err := os.WriteFile(imgFile, file, 0644)
+	imgFile := path.Join(ImageDir, strconv.Itoa(int(pid)) + "." + ext)
+	err = os.WriteFile(imgFile, file, 0644)
 	if err != nil {
 		log.Print(err)
 		return
@@ -716,7 +716,7 @@ func getImage(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		_, err := w.Write(post.Imgdata)
+		_, err = w.Write(post.Imgdata)
 		if err != nil {
 			log.Print(err)
 			return
