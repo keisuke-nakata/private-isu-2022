@@ -79,7 +79,7 @@ type GetIndexFlatPost struct {
 	Mime      string    `db:"mime"`
 	CreatedAt time.Time `db:"created_at"`
 	// 以下 User
-	UserID          int       `db:"user_user_id"`
+	UserUserID      int       `db:"user_user_id"`
 	UserAccountName string    `db:"user_account_name"`
 	UserPasshash    string    `db:"user_passhash"`
 	UserAuthority   int       `db:"user_authority"`
@@ -417,18 +417,18 @@ func getIndex(w http.ResponseWriter, r *http.Request) {
 	var results []Post
 	for _, p := range tmp_results {
 		post := Post{
-			ID:        p.id,
-			UserID:    p.user_id,
-			Body:      p.body,
-			Mime:      p.mime,
-			CreatedAt: p.created_at,
+			ID:        p.ID,
+			UserID:    p.UserID,
+			Body:      p.Body,
+			Mime:      p.Mime,
+			CreatedAt: p.CreatedAt,
 			User: User{
-				ID:          p.user_user_id,
-				AccountName: p.user_account_name,
-				Passhash:    p.user_passhash,
-				Authority:   p.user_authority,
-				DelFlg:      p.user_del_flg,
-				CreatedAt:   p.user_created_at,
+				ID:          p.UserUserID,
+				AccountName: p.UserAccountName,
+				Passhash:    p.UserPasshash,
+				Authority:   p.UserAuthority,
+				DelFlg:      p.UserDelFlg,
+				CreatedAt:   p.UserCreatedAt,
 			},
 		}
 		results = append(results, post)
