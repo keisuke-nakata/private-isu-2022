@@ -4,5 +4,7 @@
 			"path": "."
 		}
 	],
-	"settings": {}
+	"settings": {
+		"go.goroot": "/Users/keisuke.nakata/.gvm/gos/go1.18.3"
+	}
 }
