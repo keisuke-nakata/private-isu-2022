@@ -71,6 +71,22 @@ type Comment struct {
 	User      User
 }
 
+type GetIndexFlatPost struct {
+	ID        int       `db:"id"`
+	UserID    int       `db:"user_id"`
+	Imgdata   []byte    `db:"imgdata"`
+	Body      string    `db:"body"`
+	Mime      string    `db:"mime"`
+	CreatedAt time.Time `db:"created_at"`
+	// 以下 User
+	UserID          int       `db:"user_user_id"`
+	UserAccountName string    `db:"user_account_name"`
+	UserPasshash    string    `db:"user_passhash"`
+	UserAuthority   int       `db:"user_authority"`
+	UserDelFlg      int       `db:"user_del_flg"`
+	UserCreatedAt   time.Time `db:"user_created_at"`
+}
+
 func init() {
 	memdAddr := os.Getenv("ISUCONP_MEMCACHED_ADDRESS")
 	if memdAddr == "" {
@@ -384,18 +400,38 @@ func getLogout(w http.ResponseWriter, r *http.Request) {
 func getIndex(w http.ResponseWriter, r *http.Request) {
 	me := getSessionUser(r)
 
-	results := []Post{}
+	tmp_results := []GetIndexFlatPost{}
 
 	err := db.Select(&results, "SELECT "+
 		"`posts`.`id`, `posts`.`user_id`, `posts`.`body`, `posts`.`mime`, `posts`.`created_at`, "+
-		"`users`.`id` AS 'User.ID', `users`.`account_name` AS 'User.AccountName', `users`.`passhash` AS 'User.Passhash',"+
-		"`users`.`authority` AS 'User.Authority', `users`.`del_flg` AS 'User.DelFlg', `users`.`created_at` AS 'User.CreatedAt'"+
+		"`users`.`id` AS user_user_id, `users`.`account_name` AS user_account_name, `users`.`passhash` AS user_passhash, "+
+		"`users`.`authority` AS user_authority, `users`.`del_flg` AS user_del_flg, `users`.`created_at` AS user_created_at "+
 		"FROM `posts` JOIN `users` ON `posts`.`user_id` = `users`.`id` "+
 		"WHERE `users`.`del_flg` = 0 "+
 		"ORDER BY `posts`.`created_at` DESC LIMIT ?", postsPerPage)
 	if err != nil {
 		log.Print(err)
 		return
+	}
+
+	var results []Post
+	for _, p := range tmp_results {
+		post := Post{
+			ID:        p.id,
+			UserID:    p.user_id,
+			Body:      p.body,
+			Mime:      p.mime,
+			CreatedAt: p.created_at,
+			User: User{
+				ID:          p.user_user_id,
+				AccountName: p.user_account_name,
+				Passhash:    p.user_passhash,
+				Authority:   p.user_authority,
+				DelFlg:      p.user_del_flg,
+				CreatedAt:   p.user_created_at,
+			},
+		}
+		results = append(results, post)
 	}
 
 	posts, err := makePosts(results, getCSRFToken(r), false)
