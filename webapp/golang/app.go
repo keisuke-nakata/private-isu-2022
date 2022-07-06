@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	crand "crypto/rand"
 	"fmt"
@@ -16,7 +17,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"bytes"
 
 	"github.com/bradfitz/gomemcache/memcache"
 	gsm "github.com/bradleypeabody/gorilla-sessions-memcache"
@@ -216,12 +216,7 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 
 		p.CSRFToken = csrfToken
 
-		if p.User.DelFlg == 0 {
-			posts = append(posts, p)
-		}
-		if len(posts) >= postsPerPage {
-			break
-		}
+		posts = append(posts, p)
 	}
 
 	return posts, nil
@@ -391,7 +386,10 @@ func getIndex(w http.ResponseWriter, r *http.Request) {
 
 	results := []Post{}
 
-	err := db.Select(&results, "SELECT `id`, `user_id`, `body`, `mime`, `created_at` FROM `posts` ORDER BY `created_at` DESC")
+	err := db.Select(&results, "SELECT `posts`.`id`, `posts`.`user_id`, `posts`.`body`, `posts`.`mime`, `posts`.`created_at` "+
+		"FROM `posts` JOIN `users` ON `posts`.`user_id` = `users`.`id` "+
+		"WHERE `users`.`del_flg` = 0 "+
+		"ORDER BY `posts`.`created_at` DESC LIMIT ?", postsPerPage)
 	if err != nil {
 		log.Print(err)
 		return
@@ -663,7 +661,7 @@ func postIndex(w http.ResponseWriter, r *http.Request) {
 		me.ID,
 		mime,
 		// filedata,
-		"",  // 画像はDBには保存しない
+		"", // 画像はDBには保存しない
 		r.FormValue("body"),
 	)
 	if err != nil {
@@ -678,7 +676,7 @@ func postIndex(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 画像をファイルとして保存
-	filePath := path.Join(ImageDir, strconv.Itoa(int(pid)) + "." + ext)
+	filePath := path.Join(ImageDir, strconv.Itoa(int(pid))+"."+ext)
 	buf := bytes.NewBuffer(nil)
 	_, err = io.Copy(buf, file)
 	if err != nil {
@@ -716,7 +714,7 @@ func getImage(w http.ResponseWriter, r *http.Request) {
 		ext == "gif" && post.Mime == "image/gif" {
 		w.Header().Set("Content-Type", post.Mime)
 		// 画像をファイルとして保存
-		filePath := path.Join(ImageDir, strconv.Itoa(post.ID) + "." + ext)
+		filePath := path.Join(ImageDir, strconv.Itoa(post.ID)+"."+ext)
 		err := os.WriteFile(filePath, post.Imgdata, 0644)
 		if err != nil {
 			log.Print(err)
@@ -884,7 +882,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to connect to DB: %s.", err.Error())
 	}
-	db.SetMaxOpenConns(0)  // 0: 無限
+	db.SetMaxOpenConns(0) // 0: 無限
 	db.SetMaxIdleConns(30)
 	defer db.Close()
 
