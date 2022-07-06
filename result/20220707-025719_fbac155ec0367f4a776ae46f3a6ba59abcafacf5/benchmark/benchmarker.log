@@ -1,0 +1,1 @@
+{"pass":false,"score":0,"success":16,"fail":3,"messages":["CSRFトークンが取得できません (GET /)","ユーザー名が表示されていません (GET /)"]}
