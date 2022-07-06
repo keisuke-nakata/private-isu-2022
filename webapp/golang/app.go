@@ -402,7 +402,7 @@ func getIndex(w http.ResponseWriter, r *http.Request) {
 
 	tmp_results := []GetIndexFlatPost{}
 
-	err := db.Select(&results, "SELECT "+
+	err := db.Select(&tmp_results, "SELECT "+
 		"`posts`.`id`, `posts`.`user_id`, `posts`.`body`, `posts`.`mime`, `posts`.`created_at`, "+
 		"`users`.`id` AS user_user_id, `users`.`account_name` AS user_account_name, `users`.`passhash` AS user_passhash, "+
 		"`users`.`authority` AS user_authority, `users`.`del_flg` AS user_del_flg, `users`.`created_at` AS user_created_at "+
