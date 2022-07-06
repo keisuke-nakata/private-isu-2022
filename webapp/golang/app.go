@@ -685,7 +685,7 @@ func postIndex(w http.ResponseWriter, r *http.Request) {
 		log.Print(err)
 		return
 	}
-	err = os.WriteFile(filePath, buf, 0644)
+	err = os.WriteFile(filePath, buf.Bytes(), 0644)
 	if err != nil {
 		log.Print(err)
 		return
