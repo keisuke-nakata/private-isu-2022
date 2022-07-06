@@ -1,0 +1,1 @@
+{"pass":false,"score":74,"success":71,"fail":1,"messages":["リダイレクト先URLが正しくありません: expected '^/posts/\\d+$', got '/' (POST /)"]}
