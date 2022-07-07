@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	crand "crypto/rand"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"io"
@@ -263,9 +264,16 @@ func makePosts(results []Post, w http.ResponseWriter, r *http.Request, allCommen
 				}
 				comments = append(comments, comment)
 			}
-			session.Values[key] = comments
+			cacheComments, err := json.Marshal(comments)
+			if err != nil {
+				return nil, err
+			}
+			session.Values[key] = cacheComments
 		} else { // cache hit
-			comments = cacheComments.([]Comment)
+			err := json.Unmarshal(cacheComments.([]byte), &comments)
+			if err != nil {
+				return nil, err
+			}
 		}
 
 		// reverse
