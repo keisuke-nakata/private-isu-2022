@@ -25,3 +25,4 @@
 |20220707-025719|false|0|16|3|fbac155ec0367f4a776ae46f3a6ba59abcafacf5|fix bug|
 |20220707-031430|true|49627|47191|12|0eefab116dbd9ef3eda74f0637873def6d7bce63|flat post data with user|
 |20220707-214626|true|47817|45517|12|a712681af1a965e7078d87f7bc805d4e991ebc3e|delay pt-query-digest|
+|20220707-215212|true|50798|48456|12|baf771ad319d696910e839334584fe3e0e548a95|ALTER TABLE comments ADD INDEX user_id_idx (user_id);|
