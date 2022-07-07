@@ -30,3 +30,4 @@
 |20220707-233911|true|62186|60169|12|505d3a6901c53fef7bc107036268f38131eafefc|comments join users|
 |20220707-235126|true|56320|54162|12|ff1f4cc199bec0887aa5d1908ff1869eed170279|memcache comments.post_id.join_users.allComments|
 |20220708-002517|true|78904|77080|12|fbd89ecaffbad5fc7995f742fae36bf092ca7863|memcache comments.post_id.join_users.allComments again|
+|20220708-010630|true|0|50847|591508|6ce0ce3e8d31a5dc30b628c37fb0762c3b9ef48e|global memcache|
