@@ -32,3 +32,4 @@
 |20220708-002517|true|78904|77080|12|fbd89ecaffbad5fc7995f742fae36bf092ca7863|memcache comments.post_id.join_users.allComments again|
 |20220708-010630|true|0|50847|591508|6ce0ce3e8d31a5dc30b628c37fb0762c3b9ef48e|global memcache|
 |20220708-011401|true|85181|82692|12|e3efff00f0c5fe708efa657ae60f70aab7f6aea2|benchmarker ulimit 10000|
+|20220708-011853|true|86346|83861|12|dd932d49acf07820b01f28ca4d80930ff4fb8f5c|expiration 20|
