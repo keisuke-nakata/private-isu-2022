@@ -461,7 +461,8 @@ func getIndex(w http.ResponseWriter, r *http.Request) {
 		"`posts`.`id`, `posts`.`user_id`, `posts`.`body`, `posts`.`mime`, `posts`.`created_at`, "+
 		"`users`.`id` AS user_user_id, `users`.`account_name` AS user_account_name, `users`.`passhash` AS user_passhash, "+
 		"`users`.`authority` AS user_authority, `users`.`del_flg` AS user_del_flg, `users`.`created_at` AS user_created_at "+
-		"FROM `posts` FORCE INDEX (`post_user_idx`) JOIN `users` ON `posts`.`user_id` = `users`.`id` "+
+		// "FROM `posts` FORCE INDEX (`post_user_idx`) JOIN `users` ON `posts`.`user_id` = `users`.`id` "+
+		"FROM `posts` JOIN `users` ON `posts`.`user_id` = `users`.`id` "+
 		"WHERE `users`.`del_flg` = 0 "+
 		"ORDER BY `posts`.`created_at` DESC LIMIT ?", postsPerPage)
 	if err != nil {
