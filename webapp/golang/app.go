@@ -192,7 +192,7 @@ func getFlash(w http.ResponseWriter, r *http.Request, key string) string {
 	}
 }
 
-func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, error) {
+func makePosts(results []Post, r *http.Request, allComments bool) ([]Post, error) {
 	var posts []Post
 
 	for _, p := range results {
@@ -225,12 +225,7 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 
 		p.Comments = comments
 
-		// err = db.Get(&p.User, "SELECT * FROM `users` WHERE `id` = ?", p.UserID)
-		// if err != nil {
-		// 	return nil, err
-		// }
-
-		p.CSRFToken = csrfToken
+		p.CSRFToken = getCSRFToken(r)
 
 		posts = append(posts, p)
 	}
@@ -434,7 +429,7 @@ func getIndex(w http.ResponseWriter, r *http.Request) {
 		results = append(results, post)
 	}
 
-	posts, err := makePosts(results, getCSRFToken(r), false)
+	posts, err := makePosts(results, r, false)
 	if err != nil {
 		log.Print(err)
 		return
@@ -480,7 +475,7 @@ func getAccountName(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	posts, err := makePosts(results, getCSRFToken(r), false)
+	posts, err := makePosts(results, r, false)
 	if err != nil {
 		log.Print(err)
 		return
@@ -568,7 +563,7 @@ func getPosts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	posts, err := makePosts(results, getCSRFToken(r), false)
+	posts, err := makePosts(results, r, false)
 	if err != nil {
 		log.Print(err)
 		return
@@ -604,7 +599,7 @@ func getPostsID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	posts, err := makePosts(results, getCSRFToken(r), true)
+	posts, err := makePosts(results, r, true)
 	if err != nil {
 		log.Print(err)
 		return
