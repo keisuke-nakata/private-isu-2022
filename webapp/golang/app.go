@@ -204,7 +204,7 @@ func makePosts(results []Post, w http.ResponseWriter, r *http.Request, allCommen
 			if err != nil {
 				return nil, err
 			}
-			session.Values[key] = commentCount
+			session.Values[key] = p.CommentCount
 			fmt.Println("cache miss " + key)
 		} else { // cache hit
 			p.CommentCount = commentCount.(int)
