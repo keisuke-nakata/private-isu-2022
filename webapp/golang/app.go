@@ -227,53 +227,46 @@ func makePosts(results []Post, w http.ResponseWriter, r *http.Request, allCommen
 			p.CommentCount = commentCount.(int)
 		}
 
-		query := "SELECT c.id AS id, c.post_id AS post_id, c.user_id AS user_id, c.comment AS comment, c.created_at AS created_at, " +
-			"u.id AS user_user_id, u.account_name AS user_account_name, u.passhash AS user_passhash, u.authority AS user_authority, " +
-			"u.del_flg AS user_del_flg, u.created_at AS user_created_at " +
-			"FROM `comments` c JOIN `users` u ON c.user_id = u.id " +
-			"WHERE c.post_id = ? " +
-			"ORDER BY c.created_at DESC"
-
-		// query := "SELECT * FROM `comments` WHERE `post_id` = ? ORDER BY `created_at` DESC"
-		if !allComments {
-			query += " LIMIT 3"
-		}
-		var commentsWithUserFlat []CommentWithUserFlat
-		err := db.Select(&commentsWithUserFlat, query, p.ID)
-		if err != nil {
-			return nil, err
-		}
-
+		key = "comments." + strconv.Itoa(p.ID) + ".join_users." + strconv.FormatBool(allComments)
 		var comments []Comment
-		for _, c := range commentsWithUserFlat {
-			comment := Comment{
-				ID:        c.ID,
-				PostID:    c.PostID,
-				UserID:    c.UserID,
-				Comment:   c.Comment,
-				CreatedAt: c.CreatedAt,
-				User: User{
-					ID:          c.UserUserID,
-					AccountName: c.UserAccountName,
-					Passhash:    c.UserPasshash,
-					Authority:   c.UserAuthority,
-					DelFlg:      c.UserDelFlg,
-					CreatedAt:   c.UserCreatedAt,
-				},
+		cacheComments, ok := session.Values[key]
+		if !ok { // cache miss
+			query := "SELECT c.id AS id, c.post_id AS post_id, c.user_id AS user_id, c.comment AS comment, c.created_at AS created_at, " +
+				"u.id AS user_user_id, u.account_name AS user_account_name, u.passhash AS user_passhash, u.authority AS user_authority, " +
+				"u.del_flg AS user_del_flg, u.created_at AS user_created_at " +
+				"FROM `comments` c JOIN `users` u ON c.user_id = u.id " +
+				"WHERE c.post_id = ? " +
+				"ORDER BY c.created_at DESC"
+			if !allComments {
+				query += " LIMIT 3"
 			}
-			comments = append(comments, comment)
+			var commentsWithUserFlat []CommentWithUserFlat
+			err := db.Select(&commentsWithUserFlat, query, p.ID)
+			if err != nil {
+				return nil, err
+			}
+			for _, c := range commentsWithUserFlat {
+				comment := Comment{
+					ID:        c.ID,
+					PostID:    c.PostID,
+					UserID:    c.UserID,
+					Comment:   c.Comment,
+					CreatedAt: c.CreatedAt,
+					User: User{
+						ID:          c.UserUserID,
+						AccountName: c.UserAccountName,
+						Passhash:    c.UserPasshash,
+						Authority:   c.UserAuthority,
+						DelFlg:      c.UserDelFlg,
+						CreatedAt:   c.UserCreatedAt,
+					},
+				}
+				comments = append(comments, comment)
+			}
+			session.Values[key] = comments
+		} else { // cache hit
+			comments = cacheComments.([]Comment)
 		}
-		// err := db.Select(&comments, query, p.ID)
-		// if err != nil {
-		// 	return nil, err
-		// }
-
-		// for i := 0; i < len(comments); i++ {
-		// 	err := db.Get(&comments[i].User, "SELECT * FROM `users` WHERE `id` = ?", comments[i].UserID)
-		// 	if err != nil {
-		// 		return nil, err
-		// 	}
-		// }
 
 		// reverse
 		for i, j := 0, len(comments)-1; i < j; i, j = i+1, j-1 {

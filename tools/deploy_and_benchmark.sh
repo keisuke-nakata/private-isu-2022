@@ -104,7 +104,7 @@ sudo gzip --best -c $NGINX_ERROR_LOG > $nginx_result_dir/error.log.gz
 # analyze mysql slow query log
 readonly mysql_result_dir=$result_dir/mysql
 mkdir -p $mysql_result_dir
-sudo mysqldumpslow $MYSQL_SLOW_LOG > $mysql_result_dir/mysqldumpslow.log
+# sudo mysqldumpslow $MYSQL_SLOW_LOG > $mysql_result_dir/mysqldumpslow.log  # 遅いので後回し
 # sudo pt-query-digest $MYSQL_SLOW_LOG > $mysql_result_dir/pt-query-digest.log  # 遅いので後回し
 # sudo gzip --best -c $MYSQL_SLOW_LOG > $mysql_result_dir/mysql-slow.log.gz  # 重すぎる
 
@@ -120,6 +120,7 @@ git commit -m "${commit_id}" -m "committed by deploy_and_benchmark.sh"
 git push
 
 # 後回しにされた処理を実行
+sudo mysqldumpslow $MYSQL_SLOW_LOG > $mysql_result_dir/mysqldumpslow.log
 sudo pt-query-digest $MYSQL_SLOW_LOG > $mysql_result_dir/pt-query-digest.log
 
 sudo chown -R isucon $result_dir
