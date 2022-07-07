@@ -192,13 +192,23 @@ func getFlash(w http.ResponseWriter, r *http.Request, key string) string {
 	}
 }
 
-func makePosts(results []Post, r *http.Request, allComments bool) ([]Post, error) {
+func makePosts(results []Post, w http.ResponseWriter, r *http.Request, allComments bool) ([]Post, error) {
 	var posts []Post
+	session := getSession(r)
 
 	for _, p := range results {
-		err := db.Get(&p.CommentCount, "SELECT COUNT(*) AS `count` FROM `comments` WHERE `post_id` = ?", p.ID)
-		if err != nil {
-			return nil, err
+		key := "comments." + strconv.Itoa(p.ID) + ".count"
+		commentCount, ok := session.Values[key]
+		if !ok { // cache miss
+			err := db.Get(&p.CommentCount, "SELECT COUNT(*) AS `count` FROM `comments` WHERE `post_id` = ?", p.ID)
+			if err != nil {
+				return nil, err
+			}
+			session.Values[key] = commentCount
+			fmt.Println("cache miss " + key)
+		} else { // cache hit
+			p.CommentCount = commentCount.(int)
+			fmt.Println("cache hit" + key)
 		}
 
 		query := "SELECT * FROM `comments` WHERE `post_id` = ? ORDER BY `created_at` DESC"
@@ -206,7 +216,7 @@ func makePosts(results []Post, r *http.Request, allComments bool) ([]Post, error
 			query += " LIMIT 3"
 		}
 		var comments []Comment
-		err = db.Select(&comments, query, p.ID)
+		err := db.Select(&comments, query, p.ID)
 		if err != nil {
 			return nil, err
 		}
@@ -229,6 +239,8 @@ func makePosts(results []Post, r *http.Request, allComments bool) ([]Post, error
 
 		posts = append(posts, p)
 	}
+
+	session.Save(r, w)
 
 	return posts, nil
 }
@@ -429,7 +441,7 @@ func getIndex(w http.ResponseWriter, r *http.Request) {
 		results = append(results, post)
 	}
 
-	posts, err := makePosts(results, r, false)
+	posts, err := makePosts(results, w, r, false)
 	if err != nil {
 		log.Print(err)
 		return
@@ -475,7 +487,7 @@ func getAccountName(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	posts, err := makePosts(results, r, false)
+	posts, err := makePosts(results, w, r, false)
 	if err != nil {
 		log.Print(err)
 		return
@@ -563,7 +575,7 @@ func getPosts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	posts, err := makePosts(results, r, false)
+	posts, err := makePosts(results, w, r, false)
 	if err != nil {
 		log.Print(err)
 		return
@@ -599,7 +611,7 @@ func getPostsID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	posts, err := makePosts(results, r, true)
+	posts, err := makePosts(results, w, r, true)
 	if err != nil {
 		log.Print(err)
 		return
