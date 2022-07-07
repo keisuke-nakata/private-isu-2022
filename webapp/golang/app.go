@@ -201,12 +201,14 @@ func makePosts(results []Post, w http.ResponseWriter, r *http.Request, allCommen
 		key := "comments." + strconv.Itoa(p.ID) + ".count"
 		commentCount, ok := session.Values[key]
 		if !ok { // cache miss
+			fmt.Println("cache miss " + key)
 			err := db.Get(&p.CommentCount, "SELECT COUNT(*) AS `count` FROM `comments` WHERE `post_id` = ?", p.ID)
 			if err != nil {
 				return nil, err
 			}
 			session.Values[key] = p.CommentCount
 		} else { // cache hit
+			fmt.Println("cache hit " + key)
 			p.CommentCount = commentCount.(int)
 		}
 
