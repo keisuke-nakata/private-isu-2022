@@ -27,3 +27,4 @@
 |20220707-214626|true|47817|45517|12|a712681af1a965e7078d87f7bc805d4e991ebc3e|delay pt-query-digest|
 |20220707-215212|true|50798|48456|12|baf771ad319d696910e839334584fe3e0e548a95|ALTER TABLE comments ADD INDEX user_id_idx (user_id);|
 |20220707-225153|true|58585|56392|12|cfaff0934a7bbfa2d2dd0ccc7a0c617244a150e0|memcache comments.post_id.count|
+|20220707-233911|true|62186|60169|12|505d3a6901c53fef7bc107036268f38131eafefc|comments join users|
