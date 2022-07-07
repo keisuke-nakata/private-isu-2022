@@ -222,7 +222,7 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 			if err != nil {
 				return nil, err
 			}
-			memcacheClient.Set(&memcache.Item{Key: key, Value: []byte(strconv.Itoa(p.CommentCount)), Expiration: 10})
+			memcacheClient.Set(&memcache.Item{Key: key, Value: []byte(strconv.Itoa(p.CommentCount)), Expiration: 20})
 		} else { // cache hit
 			val, err := strconv.Atoi(string(item.Value))
 			if err != nil {
@@ -271,7 +271,7 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 			if err != nil {
 				return nil, err
 			}
-			memcacheClient.Set(&memcache.Item{Key: key, Value: cacheComments, Expiration: 10})
+			memcacheClient.Set(&memcache.Item{Key: key, Value: cacheComments, Expiration: 20})
 		} else { // cache hit
 			err := json.Unmarshal(item.Value, &comments)
 			if err != nil {
