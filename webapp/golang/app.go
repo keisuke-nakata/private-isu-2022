@@ -30,8 +30,9 @@ import (
 )
 
 var (
-	db    *sqlx.DB
-	store *gsm.MemcacheStore
+	db             *sqlx.DB
+	memcacheClient *memcache.Client
+	store          *gsm.MemcacheStore
 )
 
 const (
@@ -112,7 +113,6 @@ func init() {
 	}
 	memcacheClient := memcache.New(memdAddr)
 	store = gsm.NewMemcacheStore(memcacheClient, "iscogram_", []byte("sendagaya"))
-	store.Options.MaxAge = 10
 	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
 }
 
@@ -211,27 +211,30 @@ func getFlash(w http.ResponseWriter, r *http.Request, key string) string {
 	}
 }
 
-func makePosts(results []Post, w http.ResponseWriter, r *http.Request, allComments bool) ([]Post, error) {
+func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, error) {
 	var posts []Post
-	session := getSession(r)
 
 	for _, p := range results {
 		key := "comments." + strconv.Itoa(p.ID) + ".count"
-		commentCount, ok := session.Values[key]
-		if !ok { // cache miss
+		item, err := memcacheClient.Get(key)
+		if err != nil { // cache miss
 			err := db.Get(&p.CommentCount, "SELECT COUNT(*) AS `count` FROM `comments` WHERE `post_id` = ?", p.ID)
 			if err != nil {
 				return nil, err
 			}
-			session.Values[key] = p.CommentCount
+			memcacheClient.Set(&memcache.Item{Key: key, Value: []byte(strconv.Itoa(p.CommentCount)), Expiration: 10})
 		} else { // cache hit
-			p.CommentCount = commentCount.(int)
+			val, err := strconv.Atoi(string(item.Value))
+			if err != nil {
+				return nil, err
+			}
+			p.CommentCount = val
 		}
 
 		key = "comments." + strconv.Itoa(p.ID) + ".join_users." + strconv.FormatBool(allComments)
 		var comments []Comment
-		cacheComments, ok := session.Values[key]
-		if !ok { // cache miss
+		item, err = memcacheClient.Get(key)
+		if err != nil { // cache miss
 			query := "SELECT c.id AS id, c.post_id AS post_id, c.user_id AS user_id, c.comment AS comment, c.created_at AS created_at, " +
 				"u.id AS user_user_id, u.account_name AS user_account_name, u.passhash AS user_passhash, u.authority AS user_authority, " +
 				"u.del_flg AS user_del_flg, u.created_at AS user_created_at " +
@@ -268,9 +271,9 @@ func makePosts(results []Post, w http.ResponseWriter, r *http.Request, allCommen
 			if err != nil {
 				return nil, err
 			}
-			session.Values[key] = cacheComments
+			memcacheClient.Set(&memcache.Item{Key: key, Value: cacheComments, Expiration: 10})
 		} else { // cache hit
-			err := json.Unmarshal(cacheComments.([]byte), &comments)
+			err := json.Unmarshal(item.Value, &comments)
 			if err != nil {
 				return nil, err
 			}
@@ -283,12 +286,10 @@ func makePosts(results []Post, w http.ResponseWriter, r *http.Request, allCommen
 
 		p.Comments = comments
 
-		p.CSRFToken = getCSRFToken(r)
+		p.CSRFToken = csrfToken
 
 		posts = append(posts, p)
 	}
-
-	session.Save(r, w)
 
 	return posts, nil
 }
@@ -489,7 +490,7 @@ func getIndex(w http.ResponseWriter, r *http.Request) {
 		results = append(results, post)
 	}
 
-	posts, err := makePosts(results, w, r, false)
+	posts, err := makePosts(results, getCSRFToken(r), false)
 	if err != nil {
 		log.Print(err)
 		return
@@ -535,7 +536,7 @@ func getAccountName(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	posts, err := makePosts(results, w, r, false)
+	posts, err := makePosts(results, getCSRFToken(r), false)
 	if err != nil {
 		log.Print(err)
 		return
@@ -623,7 +624,7 @@ func getPosts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	posts, err := makePosts(results, w, r, false)
+	posts, err := makePosts(results, getCSRFToken(r), false)
 	if err != nil {
 		log.Print(err)
 		return
@@ -659,7 +660,7 @@ func getPostsID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	posts, err := makePosts(results, w, r, true)
+	posts, err := makePosts(results, getCSRFToken(r), true)
 	if err != nil {
 		log.Print(err)
 		return
