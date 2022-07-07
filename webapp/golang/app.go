@@ -94,6 +94,7 @@ func init() {
 	}
 	memcacheClient := memcache.New(memdAddr)
 	store = gsm.NewMemcacheStore(memcacheClient, "iscogram_", []byte("sendagaya"))
+	store.Options.MaxAge = 10
 	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
 }
 
@@ -205,10 +206,8 @@ func makePosts(results []Post, w http.ResponseWriter, r *http.Request, allCommen
 				return nil, err
 			}
 			session.Values[key] = p.CommentCount
-			fmt.Println("cache miss " + key)
 		} else { // cache hit
 			p.CommentCount = commentCount.(int)
-			fmt.Println("cache hit" + key)
 		}
 
 		query := "SELECT * FROM `comments` WHERE `post_id` = ? ORDER BY `created_at` DESC"
