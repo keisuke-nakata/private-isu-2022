@@ -219,10 +219,28 @@ func getFlash(w http.ResponseWriter, r *http.Request, key string) string {
 func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, error) {
 	var posts []Post
 
+	var countKeys []string
+	var joinUsersKeys []string
+	for _, p := range results {
+		countKey := "comments." + strconv.Itoa(p.ID) + ".count"
+		joinUsersKey := "comments." + strconv.Itoa(p.ID) + ".join_users." + strconv.FormatBool(allComments)
+		countKeys = append(countKeys, countKey)
+		joinUsersKeys = append(joinUsersKeys, joinUsersKey)
+	}
+	cacheCounts, err := memcacheClient.GetMulti(countKeys)
+	if err != nil {
+		return nil, err
+	}
+	cacheJoinUsers, err := memcacheClient.GetMulti(joinUsersKeys)
+	if err != nil {
+		return nil, err
+	}
+
 	for _, p := range results {
 		key := "comments." + strconv.Itoa(p.ID) + ".count"
-		item, err := memcacheClient.Get(key)
-		if err != nil { // cache miss
+		item, ok := cacheCounts[key]
+		// item, err := memcacheClient.Get(key)
+		if !ok { // cache miss
 			err := db.Get(&p.CommentCount, "SELECT COUNT(*) AS `count` FROM `comments` WHERE `post_id` = ?", p.ID)
 			if err != nil {
 				return nil, err
@@ -238,8 +256,9 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 
 		key = "comments." + strconv.Itoa(p.ID) + ".join_users." + strconv.FormatBool(allComments)
 		var comments []Comment
-		item, err = memcacheClient.Get(key)
-		if err != nil { // cache miss
+		// item, err = memcacheClient.Get(key)
+		item, ok = cacheJoinUsers[key]
+		if !ok { // cache miss
 			query := "SELECT c.id AS id, c.post_id AS post_id, c.user_id AS user_id, c.comment AS comment, c.created_at AS created_at, " +
 				"u.id AS user_user_id, u.account_name AS user_account_name, u.passhash AS user_passhash, u.authority AS user_authority, " +
 				"u.del_flg AS user_del_flg, u.created_at AS user_created_at " +
