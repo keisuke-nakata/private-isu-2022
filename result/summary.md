@@ -29,3 +29,4 @@
 |20220707-225153|true|58585|56392|12|cfaff0934a7bbfa2d2dd0ccc7a0c617244a150e0|memcache comments.post_id.count|
 |20220707-233911|true|62186|60169|12|505d3a6901c53fef7bc107036268f38131eafefc|comments join users|
 |20220707-235126|true|56320|54162|12|ff1f4cc199bec0887aa5d1908ff1869eed170279|memcache comments.post_id.join_users.allComments|
+|20220708-002517|true|78904|77080|12|fbd89ecaffbad5fc7995f742fae36bf092ca7863|memcache comments.post_id.join_users.allComments again|
