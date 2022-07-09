@@ -1,0 +1,2 @@
+unexpected EOF
+{"pass":true,"score":160261,"success":154005,"fail":29,"messages":["1ページに表示される画像の数が足りません (GET /posts)","リクエストがタイムアウトしました (GET /posts)"]}
