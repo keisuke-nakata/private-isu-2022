@@ -24,6 +24,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/sessions"
 	"github.com/jmoiron/sqlx"
+	"github.com/pkg/profile"
 	goji "goji.io"
 	"goji.io/pat"
 	"goji.io/pattern"
@@ -72,23 +73,6 @@ type Comment struct {
 	CreatedAt time.Time `db:"created_at"`
 	User      User      `db:"u"`
 }
-
-// type GetIndexFlatPost struct {
-// 	// Post
-// 	ID        int       `db:"id"`
-// 	UserID    int       `db:"user_id"`
-// 	Imgdata   []byte    `db:"imgdata"`
-// 	Body      string    `db:"body"`
-// 	Mime      string    `db:"mime"`
-// 	CreatedAt time.Time `db:"created_at"`
-// 	// User
-// 	UserUserID      int       `db:"user_user_id"`
-// 	UserAccountName string    `db:"user_account_name"`
-// 	UserPasshash    string    `db:"user_passhash"`
-// 	UserAuthority   int       `db:"user_authority"`
-// 	UserDelFlg      int       `db:"user_del_flg"`
-// 	UserCreatedAt   time.Time `db:"user_created_at"`
-// }
 
 func init() {
 	memdAddr := os.Getenv("ISUCONP_MEMCACHED_ADDRESS")
@@ -425,17 +409,7 @@ func getLogout(w http.ResponseWriter, r *http.Request) {
 func getIndex(w http.ResponseWriter, r *http.Request) {
 	me := getSessionUser(r)
 
-	// tmp_results := []GetIndexFlatPost{}
-
 	tmp_posts := make([]Post, 0, postsPerPage)
-
-	// query := "SELECT " +
-	// 	"`posts`.`id`, `posts`.`user_id`, `posts`.`body`, `posts`.`mime`, `posts`.`created_at`, " +
-	// 	"`users`.`id` AS user_user_id, `users`.`account_name` AS user_account_name, `users`.`passhash` AS user_passhash, " +
-	// 	"`users`.`authority` AS user_authority, `users`.`del_flg` AS user_del_flg, `users`.`created_at` AS user_created_at " +
-	// 	"FROM `posts` JOIN `users` ON `posts`.`user_id` = `users`.`id` " +
-	// 	"WHERE `users`.`del_flg` = 0 " +
-	// 	"ORDER BY `posts`.`created_at` DESC LIMIT ?"
 	query := "SELECT " +
 		"`posts`.`id` AS id, `posts`.`user_id` AS user_id, `posts`.`body` AS body, `posts`.`mime` AS mime, `posts`.`created_at` AS created_at, " +
 		"`users`.`id` AS 'u.id', `users`.`account_name` AS 'u.account_name', `users`.`passhash` AS 'u.passhash', " +
@@ -443,33 +417,11 @@ func getIndex(w http.ResponseWriter, r *http.Request) {
 		"FROM `posts` JOIN `users` ON `posts`.`user_id` = `users`.`id` " +
 		"WHERE `users`.`del_flg` = 0 " +
 		"ORDER BY `posts`.`created_at` DESC LIMIT ?"
-	// err := db.Select(&tmp_results, query, postsPerPage)
 	err := db.Select(&tmp_posts, query, postsPerPage)
 	if err != nil {
 		log.Print(err)
 		return
 	}
-
-	// var results []Post
-	// for _, p := range tmp_results {
-	// 	post := Post{
-	// 		ID:        p.ID,
-	// 		UserID:    p.UserID,
-	// 		Body:      p.Body,
-	// 		Mime:      p.Mime,
-	// 		CreatedAt: p.CreatedAt,
-	// 		User: User{
-	// 			ID:          p.UserUserID,
-	// 			AccountName: p.UserAccountName,
-	// 			Passhash:    p.UserPasshash,
-	// 			Authority:   p.UserAuthority,
-	// 			DelFlg:      p.UserDelFlg,
-	// 			CreatedAt:   p.UserCreatedAt,
-	// 		},
-	// 	}
-	// 	results = append(results, post)
-	// }
-
 	posts, err := makePosts(tmp_posts, getCSRFToken(r), false)
 	if err != nil {
 		log.Print(err)
@@ -752,12 +704,6 @@ func postIndex(w http.ResponseWriter, r *http.Request) {
 
 	// 画像をファイルとして保存
 	filePath := path.Join(ImageDir, strconv.Itoa(int(pid))+"."+ext)
-	// buf := bytes.NewBuffer(nil)
-	// _, err = io.Copy(buf, filedata)
-	// if err != nil {
-	// 	log.Print(err)
-	// 	return
-	// }
 	err = os.WriteFile(filePath, filedata, 0644)
 	if err != nil {
 		log.Print(err)
@@ -922,6 +868,8 @@ func (reg *RegexpPattern) Match(r *http.Request) *http.Request {
 }
 
 func main() {
+	p := profile.Start(profile.ProfilePath("/tmp/profile.prof"))
+
 	host := os.Getenv("ISUCONP_DB_HOST")
 	if host == "" {
 		host = "localhost"
@@ -980,5 +928,6 @@ func main() {
 	mux.HandleFunc(Regexp(regexp.MustCompile(`^/@(?P<accountName>[a-zA-Z]+)$`)), getAccountName)
 	mux.Handle(pat.Get("/*"), http.FileServer(http.Dir("../public")))
 
+	p.Stop()
 	log.Fatal(http.ListenAndServe(":8080", mux))
 }
