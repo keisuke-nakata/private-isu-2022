@@ -24,8 +24,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/sessions"
 	"github.com/jmoiron/sqlx"
-
-	//"github.com/pkg/profile"
+	"github.com/pkg/profile"
 	goji "goji.io"
 	"goji.io/pat"
 	"goji.io/pattern"
@@ -293,33 +292,20 @@ func getInitialize(w http.ResponseWriter, r *http.Request) {
 }
 
 func getProfileStart(w http.ResponseWriter, r *http.Request) {
-	// m, err := url.ParseQuery(r.URL.RawQuery)
-	// if err != nil {
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// 	log.Print(err)
-	// 	return
-	// }
-	// path := m.Get("path")
-	// // path := pat.Param(r, "path")
-	// p = profile.Start(profile.ProfilePath(path))
+	m, err := url.ParseQuery(r.URL.RawQuery)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Print(err)
+		return
+	}
+	path := m.Get("path")
+	// path := pat.Param(r, "path")
+	p = profile.Start(profile.ProfilePath(path))
 	w.WriteHeader(http.StatusOK)
 }
 
-// func getProfileStart(w http.ResponseWriter, r *http.Request) {
-// 	// m, err := url.ParseQuery(r.URL.RawQuery)
-// 	// if err != nil {
-// 	// 	w.WriteHeader(http.StatusInternalServerError)
-// 	// 	log.Print(err)
-// 	// 	return
-// 	// }
-// 	// path := m.Get("path")
-// 	// // path := pat.Param(r, "path")
-// 	// p = profile.Start(profile.ProfilePath(path))
-// 	w.WriteHeader(http.StatusOK)
-// }
-
 func getProfileStop(w http.ResponseWriter, r *http.Request) {
-	// p.Stop()
+	p.Stop()
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -947,7 +933,6 @@ func main() {
 
 	mux.HandleFunc(pat.Get("/pprof/start"), getProfileStart)
 	mux.HandleFunc(pat.Get("/pprof/stop"), getProfileStop)
-	mux.HandleFunc(pat.Get("/profile2"), getProfileStart)
 	mux.HandleFunc(pat.Get("/initialize"), getInitialize)
 	mux.HandleFunc(pat.Get("/login"), getLogin)
 	mux.HandleFunc(pat.Post("/login"), postLogin)
