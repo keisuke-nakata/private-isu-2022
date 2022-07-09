@@ -299,7 +299,6 @@ func getProfileStart(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	path := m.Get("path")
-	// path := pat.Param(r, "path")
 	p = profile.Start(profile.ProfilePath(path))
 	w.WriteHeader(http.StatusOK)
 }
@@ -887,9 +886,6 @@ func (reg *RegexpPattern) Match(r *http.Request) *http.Request {
 }
 
 func main() {
-	// p := profile.Start(profile.ProfilePath("/tmp/profile.prof"))
-	// defer p.Stop()
-
 	host := os.Getenv("ISUCONP_DB_HOST")
 	if host == "" {
 		host = "localhost"
