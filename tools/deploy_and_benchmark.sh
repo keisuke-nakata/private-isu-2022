@@ -120,7 +120,7 @@ git commit -m "${commit_id}" -m "committed by deploy_and_benchmark.sh"
 git push
 
 # 後回しにされた処理を実行
-sudo mysqldumpslow $MYSQL_SLOW_LOG > $mysql_result_dir/mysqldumpslow.log
+# sudo mysqldumpslow $MYSQL_SLOW_LOG > $mysql_result_dir/mysqldumpslow.log
 sudo pt-query-digest $MYSQL_SLOW_LOG > $mysql_result_dir/pt-query-digest.log
 
 sudo chown -R isucon $result_dir

@@ -74,6 +74,11 @@ type Comment struct {
 	User      User
 }
 
+type CommentWithUser struct {
+	Comment *Comment `db:"c"`
+	User    *User    `db:"u"`
+}
+
 type CommentWithUserFlat struct {
 	// Comment
 	ID        int       `db:"id"`
@@ -259,38 +264,50 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 		// item, err = memcacheClient.Get(key)
 		item, ok = cacheJoinUsers[key]
 		if !ok { // cache miss
-			query := "SELECT c.id AS id, c.post_id AS post_id, c.user_id AS user_id, c.comment AS comment, c.created_at AS created_at, " +
-				"u.id AS user_user_id, u.account_name AS user_account_name, u.passhash AS user_passhash, u.authority AS user_authority, " +
-				"u.del_flg AS user_del_flg, u.created_at AS user_created_at " +
+			// query := "SELECT c.id AS id, c.post_id AS post_id, c.user_id AS user_id, c.comment AS comment, c.created_at AS created_at, " +
+			// 	"u.id AS user_user_id, u.account_name AS user_account_name, u.passhash AS user_passhash, u.authority AS user_authority, " +
+			// 	"u.del_flg AS user_del_flg, u.created_at AS user_created_at " +
+			// 	"FROM `comments` c JOIN `users` u ON c.user_id = u.id " +
+			// 	"WHERE c.post_id = ? " +
+			// 	"ORDER BY c.created_at DESC"
+			query := "SELECT c.id AS 'c.id', c.post_id AS 'c.post_id', c.user_id AS 'c.user_id', c.comment AS 'c.comment', c.created_at AS 'c.created_at', " +
+				"u.id AS 'u.id', u.account_name AS 'u.account_name', u.passhash AS 'u.passhash', u.authority AS 'u.authority', " +
+				"u.del_flg AS 'u.del_flg', u.created_at AS 'u.created_at' " +
 				"FROM `comments` c JOIN `users` u ON c.user_id = u.id " +
 				"WHERE c.post_id = ? " +
 				"ORDER BY c.created_at DESC"
 			if !allComments {
 				query += " LIMIT 3"
 			}
-			var commentsWithUserFlat []CommentWithUserFlat
-			err := db.Select(&commentsWithUserFlat, query, p.ID)
+			commentsWithUsers := make([]CommentWithUser, 0, 30)
+			// var commentsWithUserFlat []CommentWithUserFlat
+			// err := db.Select(&commentsWithUserFlat, query, p.ID)
+			err := db.Select(&commentsWithUsers, query, p.ID)
 			if err != nil {
 				return nil, err
 			}
-			for _, c := range commentsWithUserFlat {
-				comment := Comment{
-					ID:        c.ID,
-					PostID:    c.PostID,
-					UserID:    c.UserID,
-					Comment:   c.Comment,
-					CreatedAt: c.CreatedAt,
-					User: User{
-						ID:          c.UserUserID,
-						AccountName: c.UserAccountName,
-						Passhash:    c.UserPasshash,
-						Authority:   c.UserAuthority,
-						DelFlg:      c.UserDelFlg,
-						CreatedAt:   c.UserCreatedAt,
-					},
-				}
-				comments = append(comments, comment)
+			comments := make([]Comment, 0, 30)
+			for _, c := range commentsWithUsers {
+				comments = append(comments, *c.Comment)
 			}
+			// for _, c := range commentsWithUserFlat {
+			// 	comment := Comment{
+			// 		ID:        c.ID,
+			// 		PostID:    c.PostID,
+			// 		UserID:    c.UserID,
+			// 		Comment:   c.Comment,
+			// 		CreatedAt: c.CreatedAt,
+			// 		User: User{
+			// 			ID:          c.UserUserID,
+			// 			AccountName: c.UserAccountName,
+			// 			Passhash:    c.UserPasshash,
+			// 			Authority:   c.UserAuthority,
+			// 			DelFlg:      c.UserDelFlg,
+			// 			CreatedAt:   c.UserCreatedAt,
+			// 		},
+			// 	}
+			// 	comments = append(comments, comment)
+			// }
 			// reverse
 			for i, j := 0, len(comments)-1; i < j; i, j = i+1, j-1 {
 				comments[i], comments[j] = comments[j], comments[i]
