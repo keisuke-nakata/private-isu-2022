@@ -947,7 +947,7 @@ func main() {
 
 	mux.HandleFunc(pat.Get("/pfofile"), getProfileStart)
 	mux.HandleFunc(pat.Get("/pfofile/stop"), getProfileStop)
-	mux.HandleFunc(pat.Get("/initialize2"), getProfileStart)
+	mux.HandleFunc(pat.Get("/profile2"), getProfileStart)
 	mux.HandleFunc(pat.Get("/initialize"), getInitialize)
 	mux.HandleFunc(pat.Get("/login"), getLogin)
 	mux.HandleFunc(pat.Post("/login"), postLogin)
