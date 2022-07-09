@@ -932,7 +932,7 @@ func main() {
 
 	mux := goji.NewMux()
 
-	mux.HandleFunc(pat.Get("/pfofile/start"), getProfileStart)
+	mux.HandleFunc(pat.Get("/pfofile"), getProfileStart)
 	mux.HandleFunc(pat.Get("/pfofile/stop"), getProfileStop)
 	mux.HandleFunc(pat.Get("/initialize"), getInitialize)
 	mux.HandleFunc(pat.Get("/login"), getLogin)
