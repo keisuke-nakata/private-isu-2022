@@ -292,28 +292,23 @@ func getInitialize(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func getInitialize2(w http.ResponseWriter, r *http.Request) {
-	dbInitialize()
+func getProfileStart(w http.ResponseWriter, r *http.Request) {
+	// m, err := url.ParseQuery(r.URL.RawQuery)
+	// if err != nil {
+	// 	w.WriteHeader(http.StatusInternalServerError)
+	// 	log.Print(err)
+	// 	return
+	// }
+	// path := m.Get("path")
+	// // path := pat.Param(r, "path")
+	// p = profile.Start(profile.ProfilePath(path))
 	w.WriteHeader(http.StatusOK)
 }
 
-// func getProfileStart(w http.ResponseWriter, r *http.Request) {
-// 	m, err := url.ParseQuery(r.URL.RawQuery)
-// 	if err != nil {
-// 		w.WriteHeader(http.StatusInternalServerError)
-// 		log.Print(err)
-// 		return
-// 	}
-// 	path := m.Get("path")
-// 	// path := pat.Param(r, "path")
-// 	p = profile.Start(profile.ProfilePath(path))
-// 	w.WriteHeader(http.StatusOK)
-// }
-
-// func getProfileStop(w http.ResponseWriter, r *http.Request) {
-// 	p.Stop()
-// 	w.WriteHeader(http.StatusOK)
-// }
+func getProfileStop(w http.ResponseWriter, r *http.Request) {
+	// p.Stop()
+	w.WriteHeader(http.StatusOK)
+}
 
 func getLogin(w http.ResponseWriter, r *http.Request) {
 	me := getSessionUser(r)
@@ -937,9 +932,8 @@ func main() {
 
 	mux := goji.NewMux()
 
-	// mux.HandleFunc(pat.Get("/pfofile/start"), getProfileStart)
-	// mux.HandleFunc(pat.Get("/pfofile/stop"), getProfileStop)
-	mux.HandleFunc(pat.Get("/initialize2"), getInitialize2)
+	mux.HandleFunc(pat.Get("/pfofile/start"), getProfileStart)
+	mux.HandleFunc(pat.Get("/pfofile/stop"), getProfileStop)
 	mux.HandleFunc(pat.Get("/initialize"), getInitialize)
 	mux.HandleFunc(pat.Get("/login"), getLogin)
 	mux.HandleFunc(pat.Post("/login"), postLogin)
