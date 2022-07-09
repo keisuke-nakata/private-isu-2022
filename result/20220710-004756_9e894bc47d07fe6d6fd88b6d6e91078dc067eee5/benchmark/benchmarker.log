@@ -1,0 +1,1 @@
+{"pass":true,"score":154419,"success":148913,"fail":82,"messages":["1ページに表示される画像の数が足りません (GET /posts)","リクエストがタイムアウトしました (GET /posts)"]}
