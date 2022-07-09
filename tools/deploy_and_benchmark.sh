@@ -75,8 +75,8 @@ collectl -scdm -f $collectl_result_dir -P &
 readonly collectl_job_id=$!
 
 # start profile
-readonly profile_result_dir=$result_dir/profile
-curl "http://localhost:80/pprof/start?path=${profile_result_dir}/"
+readonly profile_tmp_dir=$(mktemp -d)
+curl "http://localhost:80/pprof/start?path=${profile_tmp_dir}/"
 
 ###
 # run benchmark
@@ -92,7 +92,8 @@ ssh -i ~/.ssh/for_benchmarker isucon@$BENCHMARKER_INSTANCE_PRIVATE_IP $cmd | tee
 
 # stop profile & analyze
 curl "http://localhost:80/pprof/stop"
-go tool pprof --pdf ${benchmark_result_dir}/cpu.pprof > ${benchmark_result_dir}/prof.pdf
+readonly profile_result_dir=$result_dir/profile
+go tool pprof --pdf ${profile_tmp_dir}/cpu.pprof > ${profile_result_dir}/prof.pdf
 
 # finish collectl & run colplot
 kill -SIGINT $collectl_job_id

@@ -210,8 +210,9 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 		item, ok = cacheJoinUsers[key]
 		if !ok { // cache miss
 			query := "SELECT c.id AS 'id', c.post_id AS 'post_id', c.user_id AS 'user_id', c.comment AS 'comment', c.created_at AS 'created_at', " +
-				"u.id AS 'u.id', u.account_name AS 'u.account_name', u.passhash AS 'u.passhash', u.authority AS 'u.authority', " +
-				"u.del_flg AS 'u.del_flg', u.created_at AS 'u.created_at' " +
+				// "u.id AS 'u.id', u.account_name AS 'u.account_name', u.passhash AS 'u.passhash', u.authority AS 'u.authority', " +
+				// "u.del_flg AS 'u.del_flg', u.created_at AS 'u.created_at' " +
+				"u.account_name AS `u.account_name` " +
 				"FROM `comments` c JOIN `users` u ON c.user_id = u.id " +
 				"WHERE c.post_id = ? " +
 				"ORDER BY c.created_at DESC"
