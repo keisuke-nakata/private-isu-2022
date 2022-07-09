@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	crand "crypto/rand"
 	"crypto/sha512"
@@ -74,27 +73,6 @@ type Comment struct {
 	User      User      `db:"u"`
 }
 
-// type CommentWithUser struct {
-// 	Comment *Comment `db:"c"`
-// 	User    *User    `db:"u"`
-// }
-
-// type CommentWithUserFlat struct {
-// 	// Comment
-// 	ID        int       `db:"id"`
-// 	PostID    int       `db:"post_id"`
-// 	UserID    int       `db:"user_id"`
-// 	Comment   string    `db:"comment"`
-// 	CreatedAt time.Time `db:"created_at"`
-// 	// User
-// 	UserUserID      int       `db:"user_user_id"`
-// 	UserAccountName string    `db:"user_account_name"`
-// 	UserPasshash    string    `db:"user_passhash"`
-// 	UserAuthority   int       `db:"user_authority"`
-// 	UserDelFlg      int       `db:"user_del_flg"`
-// 	UserCreatedAt   time.Time `db:"user_created_at"`
-// }
-
 type GetIndexFlatPost struct {
 	// Post
 	ID        int       `db:"id"`
@@ -155,26 +133,10 @@ func validateUser(accountName, password string) bool {
 		regexp.MustCompile(`\A[0-9a-zA-Z_]{6,}\z`).MatchString(password)
 }
 
-// 今回のGo実装では言語側のエスケープの仕組みが使えないのでOSコマンドインジェクション対策できない
-// 取り急ぎPHPのescapeshellarg関数を参考に自前で実装
-// cf: http://jp2.php.net/manual/ja/function.escapeshellarg.php
-func escapeshellarg(arg string) string {
-	return "'" + strings.Replace(arg, "'", "'\\''", -1) + "'"
-}
-
 func digest(src string) string {
-	// // opensslのバージョンによっては (stdin)= というのがつくので取る
-	// out, err := exec.Command("/bin/bash", "-c", `printf "%s" `+escapeshellarg(src)+` | openssl dgst -sha512 | sed 's/^.*= //'`).Output()
 	d := sha512.Sum512([]byte(src))
 	out := hex.EncodeToString(d[:])
 	return out
-
-	// if err != nil {
-	// 	log.Print(err)
-	// 	return ""
-	// }
-
-	// return strings.TrimSuffix(string(out), "\n")
 }
 
 func calculateSalt(accountName string) string {
@@ -244,7 +206,6 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 	for _, p := range results {
 		key := "comments." + strconv.Itoa(p.ID) + ".count"
 		item, ok := cacheCounts[key]
-		// item, err := memcacheClient.Get(key)
 		if !ok { // cache miss
 			err := db.Get(&p.CommentCount, "SELECT COUNT(*) AS `count` FROM `comments` WHERE `post_id` = ?", p.ID)
 			if err != nil {
@@ -261,21 +222,8 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 
 		key = "comments." + strconv.Itoa(p.ID) + ".join_users." + strconv.FormatBool(allComments)
 		comments := make([]Comment, 0, 30)
-		// item, err = memcacheClient.Get(key)
 		item, ok = cacheJoinUsers[key]
 		if !ok { // cache miss
-			// query := "SELECT c.id AS id, c.post_id AS post_id, c.user_id AS user_id, c.comment AS comment, c.created_at AS created_at, " +
-			// 	"u.id AS user_user_id, u.account_name AS user_account_name, u.passhash AS user_passhash, u.authority AS user_authority, " +
-			// 	"u.del_flg AS user_del_flg, u.created_at AS user_created_at " +
-			// 	"FROM `comments` c JOIN `users` u ON c.user_id = u.id " +
-			// 	"WHERE c.post_id = ? " +
-			// 	"ORDER BY c.created_at DESC"
-			// query := "SELECT c.id AS 'c.id', c.post_id AS 'c.post_id', c.user_id AS 'c.user_id', c.comment AS 'c.comment', c.created_at AS 'c.created_at', " +
-			// 	"u.id AS 'u.id', u.account_name AS 'u.account_name', u.passhash AS 'u.passhash', u.authority AS 'u.authority', " +
-			// 	"u.del_flg AS 'u.del_flg', u.created_at AS 'u.created_at' " +
-			// 	"FROM `comments` c JOIN `users` u ON c.user_id = u.id " +
-			// 	"WHERE c.post_id = ? " +
-			// 	"ORDER BY c.created_at DESC"
 			query := "SELECT c.id AS 'id', c.post_id AS 'post_id', c.user_id AS 'user_id', c.comment AS 'comment', c.created_at AS 'created_at', " +
 				"u.id AS 'u.id', u.account_name AS 'u.account_name', u.passhash AS 'u.passhash', u.authority AS 'u.authority', " +
 				"u.del_flg AS 'u.del_flg', u.created_at AS 'u.created_at' " +
@@ -285,34 +233,10 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 			if !allComments {
 				query += " LIMIT 3"
 			}
-			// commentsWithUsers := make([]CommentWithUser, 0, 30)
-			// var commentsWithUserFlat []CommentWithUserFlat
-			// err := db.Select(&commentsWithUserFlat, query, p.ID)
 			err := db.Select(&comments, query, p.ID)
 			if err != nil {
 				return nil, err
 			}
-			// for _, c := range commentsWithUsers {
-			// 	comments = append(comments, *c.Comment)
-			// }
-			// for _, c := range commentsWithUserFlat {
-			// 	comment := Comment{
-			// 		ID:        c.ID,
-			// 		PostID:    c.PostID,
-			// 		UserID:    c.UserID,
-			// 		Comment:   c.Comment,
-			// 		CreatedAt: c.CreatedAt,
-			// 		User: User{
-			// 			ID:          c.UserUserID,
-			// 			AccountName: c.UserAccountName,
-			// 			Passhash:    c.UserPasshash,
-			// 			Authority:   c.UserAuthority,
-			// 			DelFlg:      c.UserDelFlg,
-			// 			CreatedAt:   c.UserCreatedAt,
-			// 		},
-			// 	}
-			// 	comments = append(comments, comment)
-			// }
 			// reverse
 			for i, j := 0, len(comments)-1; i < j; i, j = i+1, j-1 {
 				comments[i], comments[j] = comments[j], comments[i]
@@ -507,7 +431,6 @@ func getIndex(w http.ResponseWriter, r *http.Request) {
 		"`posts`.`id`, `posts`.`user_id`, `posts`.`body`, `posts`.`mime`, `posts`.`created_at`, "+
 		"`users`.`id` AS user_user_id, `users`.`account_name` AS user_account_name, `users`.`passhash` AS user_passhash, "+
 		"`users`.`authority` AS user_authority, `users`.`del_flg` AS user_del_flg, `users`.`created_at` AS user_created_at "+
-		// "FROM `posts` FORCE INDEX (`post_user_idx`) JOIN `users` ON `posts`.`user_id` = `users`.`id` "+
 		"FROM `posts` JOIN `users` ON `posts`.`user_id` = `users`.`id` "+
 		"WHERE `users`.`del_flg` = 0 "+
 		"ORDER BY `posts`.`created_at` DESC LIMIT ?", postsPerPage)
@@ -818,13 +741,13 @@ func postIndex(w http.ResponseWriter, r *http.Request) {
 
 	// 画像をファイルとして保存
 	filePath := path.Join(ImageDir, strconv.Itoa(int(pid))+"."+ext)
-	buf := bytes.NewBuffer(nil)
-	_, err = io.Copy(buf, file)
-	if err != nil {
-		log.Print(err)
-		return
-	}
-	err = os.WriteFile(filePath, buf.Bytes(), 0644)
+	// buf := bytes.NewBuffer(nil)
+	// _, err = io.Copy(buf, filedata)
+	// if err != nil {
+	// 	log.Print(err)
+	// 	return
+	// }
+	err = os.WriteFile(filePath, filedata, 0644)
 	if err != nil {
 		log.Print(err)
 		return
