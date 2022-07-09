@@ -869,6 +869,7 @@ func (reg *RegexpPattern) Match(r *http.Request) *http.Request {
 
 func main() {
 	p := profile.Start(profile.ProfilePath("/tmp/profile.prof"))
+	defer p.Stop()
 
 	host := os.Getenv("ISUCONP_DB_HOST")
 	if host == "" {
@@ -928,6 +929,5 @@ func main() {
 	mux.HandleFunc(Regexp(regexp.MustCompile(`^/@(?P<accountName>[a-zA-Z]+)$`)), getAccountName)
 	mux.Handle(pat.Get("/*"), http.FileServer(http.Dir("../public")))
 
-	p.Stop()
 	log.Fatal(http.ListenAndServe(":8080", mux))
 }
