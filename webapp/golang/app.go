@@ -34,6 +34,7 @@ var (
 	db             *sqlx.DB
 	memcacheClient *memcache.Client
 	store          *gsm.MemcacheStore
+	p              interface{ Stop() }
 )
 
 const (
@@ -287,6 +288,17 @@ func getTemplPath(filename string) string {
 
 func getInitialize(w http.ResponseWriter, r *http.Request) {
 	dbInitialize()
+	w.WriteHeader(http.StatusOK)
+}
+
+func getProfileStart(w http.ResponseWriter, r *http.Request) {
+	path := pat.Param(r, "path")
+	p = profile.Start(profile.ProfilePath(path))
+	w.WriteHeader(http.StatusOK)
+}
+
+func getProfileStop(w http.ResponseWriter, r *http.Request) {
+	p.Stop()
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -868,8 +880,8 @@ func (reg *RegexpPattern) Match(r *http.Request) *http.Request {
 }
 
 func main() {
-	p := profile.Start(profile.ProfilePath("/tmp/profile.prof"))
-	defer p.Stop()
+	// p := profile.Start(profile.ProfilePath("/tmp/profile.prof"))
+	// defer p.Stop()
 
 	host := os.Getenv("ISUCONP_DB_HOST")
 	if host == "" {
@@ -912,6 +924,8 @@ func main() {
 
 	mux := goji.NewMux()
 
+	mux.HandleFunc(pat.Get("/pfofile/start"), getProfileStart)
+	mux.HandleFunc(pat.Get("/pfofile/stop"), getProfileStop)
 	mux.HandleFunc(pat.Get("/initialize"), getInitialize)
 	mux.HandleFunc(pat.Get("/login"), getLogin)
 	mux.HandleFunc(pat.Post("/login"), postLogin)
