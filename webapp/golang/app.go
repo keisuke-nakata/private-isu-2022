@@ -293,6 +293,15 @@ func getInitialize(w http.ResponseWriter, r *http.Request) {
 }
 
 func getInitialize2(w http.ResponseWriter, r *http.Request) {
+	// m, err := url.ParseQuery(r.URL.RawQuery)
+	// if err != nil {
+	// 	w.WriteHeader(http.StatusInternalServerError)
+	// 	log.Print(err)
+	// 	return
+	// }
+	// path := m.Get("path")
+	// // path := pat.Param(r, "path")
+	// p = profile.Start(profile.ProfilePath(path))
 	w.WriteHeader(http.StatusOK)
 }
 
