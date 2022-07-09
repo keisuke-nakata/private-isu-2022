@@ -293,7 +293,6 @@ func getInitialize(w http.ResponseWriter, r *http.Request) {
 }
 
 func getInitialize2(w http.ResponseWriter, r *http.Request) {
-	dbInitialize()
 	w.WriteHeader(http.StatusOK)
 }
 
