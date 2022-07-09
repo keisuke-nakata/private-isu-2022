@@ -93,6 +93,7 @@ ssh -i ~/.ssh/for_benchmarker isucon@$BENCHMARKER_INSTANCE_PRIVATE_IP $cmd | tee
 # stop profile & analyze
 curl "http://localhost:80/pprof/stop"
 readonly profile_result_dir=$result_dir/profile
+mkdir -p $profile_result_dir
 go tool pprof --pdf ${profile_tmp_dir}/cpu.pprof > ${profile_result_dir}/prof.pdf
 
 # finish collectl & run colplot
