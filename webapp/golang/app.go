@@ -71,29 +71,29 @@ type Comment struct {
 	UserID    int       `db:"user_id"`
 	Comment   string    `db:"comment"`
 	CreatedAt time.Time `db:"created_at"`
-	User      User
+	User      User      `db:"u"`
 }
 
-type CommentWithUser struct {
-	Comment *Comment `db:"c"`
-	User    *User    `db:"u"`
-}
+// type CommentWithUser struct {
+// 	Comment *Comment `db:"c"`
+// 	User    *User    `db:"u"`
+// }
 
-type CommentWithUserFlat struct {
-	// Comment
-	ID        int       `db:"id"`
-	PostID    int       `db:"post_id"`
-	UserID    int       `db:"user_id"`
-	Comment   string    `db:"comment"`
-	CreatedAt time.Time `db:"created_at"`
-	// User
-	UserUserID      int       `db:"user_user_id"`
-	UserAccountName string    `db:"user_account_name"`
-	UserPasshash    string    `db:"user_passhash"`
-	UserAuthority   int       `db:"user_authority"`
-	UserDelFlg      int       `db:"user_del_flg"`
-	UserCreatedAt   time.Time `db:"user_created_at"`
-}
+// type CommentWithUserFlat struct {
+// 	// Comment
+// 	ID        int       `db:"id"`
+// 	PostID    int       `db:"post_id"`
+// 	UserID    int       `db:"user_id"`
+// 	Comment   string    `db:"comment"`
+// 	CreatedAt time.Time `db:"created_at"`
+// 	// User
+// 	UserUserID      int       `db:"user_user_id"`
+// 	UserAccountName string    `db:"user_account_name"`
+// 	UserPasshash    string    `db:"user_passhash"`
+// 	UserAuthority   int       `db:"user_authority"`
+// 	UserDelFlg      int       `db:"user_del_flg"`
+// 	UserCreatedAt   time.Time `db:"user_created_at"`
+// }
 
 type GetIndexFlatPost struct {
 	// Post
@@ -260,7 +260,7 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 		}
 
 		key = "comments." + strconv.Itoa(p.ID) + ".join_users." + strconv.FormatBool(allComments)
-		var comments []Comment
+		comments := make([]Comment, 0, 30)
 		// item, err = memcacheClient.Get(key)
 		item, ok = cacheJoinUsers[key]
 		if !ok { // cache miss
@@ -270,7 +270,13 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 			// 	"FROM `comments` c JOIN `users` u ON c.user_id = u.id " +
 			// 	"WHERE c.post_id = ? " +
 			// 	"ORDER BY c.created_at DESC"
-			query := "SELECT c.id AS 'c.id', c.post_id AS 'c.post_id', c.user_id AS 'c.user_id', c.comment AS 'c.comment', c.created_at AS 'c.created_at', " +
+			// query := "SELECT c.id AS 'c.id', c.post_id AS 'c.post_id', c.user_id AS 'c.user_id', c.comment AS 'c.comment', c.created_at AS 'c.created_at', " +
+			// 	"u.id AS 'u.id', u.account_name AS 'u.account_name', u.passhash AS 'u.passhash', u.authority AS 'u.authority', " +
+			// 	"u.del_flg AS 'u.del_flg', u.created_at AS 'u.created_at' " +
+			// 	"FROM `comments` c JOIN `users` u ON c.user_id = u.id " +
+			// 	"WHERE c.post_id = ? " +
+			// 	"ORDER BY c.created_at DESC"
+			query := "SELECT c.id AS 'id', c.post_id AS 'post_id', c.user_id AS 'user_id', c.comment AS 'comment', c.created_at AS 'created_at', " +
 				"u.id AS 'u.id', u.account_name AS 'u.account_name', u.passhash AS 'u.passhash', u.authority AS 'u.authority', " +
 				"u.del_flg AS 'u.del_flg', u.created_at AS 'u.created_at' " +
 				"FROM `comments` c JOIN `users` u ON c.user_id = u.id " +
@@ -279,17 +285,16 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 			if !allComments {
 				query += " LIMIT 3"
 			}
-			commentsWithUsers := make([]CommentWithUser, 0, 30)
+			// commentsWithUsers := make([]CommentWithUser, 0, 30)
 			// var commentsWithUserFlat []CommentWithUserFlat
 			// err := db.Select(&commentsWithUserFlat, query, p.ID)
-			err := db.Select(&commentsWithUsers, query, p.ID)
+			err := db.Select(&comments, query, p.ID)
 			if err != nil {
 				return nil, err
 			}
-			comments := make([]Comment, 0, 30)
-			for _, c := range commentsWithUsers {
-				comments = append(comments, *c.Comment)
-			}
+			// for _, c := range commentsWithUsers {
+			// 	comments = append(comments, *c.Comment)
+			// }
 			// for _, c := range commentsWithUserFlat {
 			// 	comment := Comment{
 			// 		ID:        c.ID,
