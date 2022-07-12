@@ -64,6 +64,7 @@ type Post struct {
 	Comments     []Comment
 	User         User `db:"u"`
 	CSRFToken    string
+	imageURL     string
 }
 
 type Comment struct {
@@ -242,6 +243,8 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 		p.Comments = comments
 
 		p.CSRFToken = csrfToken
+
+		p.imageURL = imageURL(p)
 
 		posts = append(posts, p)
 	}
@@ -447,11 +450,12 @@ func getIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmap := template.FuncMap{
-		"imageURL": imageURL,
-	}
+	// fmap := template.FuncMap{
+	// 	"imageURL": imageURL,
+	// }
 
-	template.Must(template.New("layout.html").Funcs(fmap).ParseFiles(
+	// template.Must(template.New("layout.html").Funcs(fmap).ParseFiles(
+	template.Must(template.New("layout.html").ParseFiles(
 		getTemplPath("layout.html"),
 		getTemplPath("index.html"),
 		getTemplPath("posts.html"),
@@ -531,11 +535,12 @@ func getAccountName(w http.ResponseWriter, r *http.Request) {
 
 	me := getSessionUser(r)
 
-	fmap := template.FuncMap{
-		"imageURL": imageURL,
-	}
+	// fmap := template.FuncMap{
+	// 	"imageURL": imageURL,
+	// }
 
-	template.Must(template.New("layout.html").Funcs(fmap).ParseFiles(
+	// template.Must(template.New("layout.html").Funcs(fmap).ParseFiles(
+	template.Must(template.New("layout.html").ParseFiles(
 		getTemplPath("layout.html"),
 		getTemplPath("user.html"),
 		getTemplPath("posts.html"),
@@ -586,11 +591,12 @@ func getPosts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmap := template.FuncMap{
-		"imageURL": imageURL,
-	}
+	// fmap := template.FuncMap{
+	// 	"imageURL": imageURL,
+	// }
 
-	template.Must(template.New("posts.html").Funcs(fmap).ParseFiles(
+	// template.Must(template.New("posts.html").Funcs(fmap).ParseFiles(
+	template.Must(template.New("posts.html").ParseFiles(
 		getTemplPath("posts.html"),
 		getTemplPath("post.html"),
 	)).Execute(w, posts)
@@ -626,11 +632,12 @@ func getPostsID(w http.ResponseWriter, r *http.Request) {
 
 	me := getSessionUser(r)
 
-	fmap := template.FuncMap{
-		"imageURL": imageURL,
-	}
+	// fmap := template.FuncMap{
+	// 	"imageURL": imageURL,
+	// }
 
-	template.Must(template.New("layout.html").Funcs(fmap).ParseFiles(
+	// template.Must(template.New("layout.html").Funcs(fmap).ParseFiles(
+	template.Must(template.New("layout.html").ParseFiles(
 		getTemplPath("layout.html"),
 		getTemplPath("post_id.html"),
 		getTemplPath("post.html"),
