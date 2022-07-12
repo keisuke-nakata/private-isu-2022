@@ -64,7 +64,7 @@ type Post struct {
 	Comments     []Comment
 	User         User `db:"u"`
 	CSRFToken    string
-	imageURL     string
+	ImageURL     string
 }
 
 type Comment struct {
@@ -244,7 +244,7 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 
 		p.CSRFToken = csrfToken
 
-		p.imageURL = imageURL(p)
+		p.ImageURL = imageURL(p)
 
 		posts = append(posts, p)
 	}
