@@ -455,7 +455,8 @@ func getIndex(w http.ResponseWriter, r *http.Request) {
 	// }
 
 	// template.Must(template.New("layout.html").Funcs(fmap).ParseFiles(
-	template.Must(template.New("layout.html").ParseFiles(
+	// template.Must(template.New("layout.html").ParseFiles(
+	template.Must(template.ParseFiles(
 		getTemplPath("layout.html"),
 		getTemplPath("index.html"),
 		getTemplPath("posts.html"),
