@@ -211,8 +211,6 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 		item, ok = cacheJoinUsers[key]
 		if !ok { // cache miss
 			query := "SELECT c.id AS 'id', c.post_id AS 'post_id', c.user_id AS 'user_id', c.comment AS 'comment', c.created_at AS 'created_at', " +
-				// "u.id AS 'u.id', u.account_name AS 'u.account_name', u.passhash AS 'u.passhash', u.authority AS 'u.authority', " +
-				// "u.del_flg AS 'u.del_flg', u.created_at AS 'u.created_at' " +
 				"u.account_name AS `u.account_name` " +
 				"FROM `comments` c JOIN `users` u ON c.user_id = u.id " +
 				"WHERE c.post_id = ? " +
@@ -450,12 +448,6 @@ func getIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// fmap := template.FuncMap{
-	// 	"imageURL": imageURL,
-	// }
-
-	// template.Must(template.New("layout.html").Funcs(fmap).ParseFiles(
-	// template.Must(template.New("layout.html").ParseFiles(
 	template.Must(template.ParseFiles(
 		getTemplPath("layout.html"),
 		getTemplPath("index.html"),
@@ -536,12 +528,7 @@ func getAccountName(w http.ResponseWriter, r *http.Request) {
 
 	me := getSessionUser(r)
 
-	// fmap := template.FuncMap{
-	// 	"imageURL": imageURL,
-	// }
-
-	// template.Must(template.New("layout.html").Funcs(fmap).ParseFiles(
-	template.Must(template.New("layout.html").ParseFiles(
+	template.Must(template.ParseFiles(
 		getTemplPath("layout.html"),
 		getTemplPath("user.html"),
 		getTemplPath("posts.html"),
@@ -592,12 +579,7 @@ func getPosts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// fmap := template.FuncMap{
-	// 	"imageURL": imageURL,
-	// }
-
-	// template.Must(template.New("posts.html").Funcs(fmap).ParseFiles(
-	template.Must(template.New("posts.html").ParseFiles(
+	template.Must(template.ParseFiles(
 		getTemplPath("posts.html"),
 		getTemplPath("post.html"),
 	)).Execute(w, posts)
@@ -633,12 +615,7 @@ func getPostsID(w http.ResponseWriter, r *http.Request) {
 
 	me := getSessionUser(r)
 
-	// fmap := template.FuncMap{
-	// 	"imageURL": imageURL,
-	// }
-
-	// template.Must(template.New("layout.html").Funcs(fmap).ParseFiles(
-	template.Must(template.New("layout.html").ParseFiles(
+	template.Must(template.ParseFiles(
 		getTemplPath("layout.html"),
 		getTemplPath("post_id.html"),
 		getTemplPath("post.html"),

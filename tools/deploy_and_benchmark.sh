@@ -119,7 +119,7 @@ mkdir -p $mysql_result_dir
 # sudo gzip --best -c $MYSQL_SLOW_LOG > $mysql_result_dir/mysql-slow.log.gz  # 重すぎる
 
 # add summary row
-readonly jqout=$(jq -r '[.pass,.score,.success,.fail] | @tsv' $benchmark_result_dir/benchmarker.log | tr '\t' '|')
+readonly jqout=$(tail -n 1 $benchmark_result_dir/benchmarker.log | jq -r '[.pass,.score,.success,.fail] | @tsv' | tr '\t' '|')
 echo "|${dt}|${jqout}|${commit_id}|${changelog}|" >> $RESULT_BASE_DIR/summary.md
 
 # git push

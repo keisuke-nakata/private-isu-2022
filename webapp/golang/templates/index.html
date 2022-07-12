@@ -19,7 +19,12 @@
   </form>
 </div>
 
-{{ template "posts.html" .Posts }}
+<div class="isu-posts">
+  {{ range .Posts }}
+  {{ template "post.html" . }}
+  {{ end }}
+</div>
+
 
 <div id="isu-post-more">
   <button id="isu-post-more-btn">もっと見る</button>
